@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Mail, Loader2, Sparkles, Home } from "lucide-react";
+import { Check, Mail, Loader2, Sparkles, Home, AlertCircle } from "lucide-react";
 import { useBooking } from "@/context/BookingContext";
 import axios from "axios";
 import { environment } from "@/config/data";
+import { OnePaySDK } from '@onepaynpm/onepay-sdk';
 
 interface ConfirmationViewProps {
   data: any;
@@ -37,6 +38,38 @@ export function ConfirmationView({
   } = useBooking();
   const [isLoading, setIsLoading] = useState(false);
   const [showThankYouDialog, setShowThankYouDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+
+  // Initialize OnePay SDK
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const onePaySDK = new OnePaySDK();
+      
+      onePaySDK.addEventListener({
+        onSuccess: (result) => {
+          console.log('Payment successful:', result);
+          setIsLoading(false);
+          setShowThankYouDialog(true);
+          // You can redirect to ticket assignment page here
+          // router.push(`/tickets/${result.orderId}/${result.token}`);
+        },
+        onFail: (result) => {
+          console.log('Payment failed:', result);
+          setIsLoading(false);
+          setErrorMessage("Payment failed. Please try again.");
+          setShowErrorDialog(true);
+        },
+        onClose: (result) => {
+          console.log('Payment modal closed:', result);
+          setIsLoading(false);
+          // Handle modal close - user might want to try again
+        }
+      });
+    }
+  }, []);
 
   // If critical data is missing, show a placeholder
   if (!personalDetails || !eventMeta) {
@@ -76,21 +109,27 @@ export function ConfirmationView({
       );
 
       if (response.data?.data?.payment_url) {
-        // Redirect to payment page
-        window.location.href = response.data.data.payment_url;
+        const paymentUrl = response.data.data.payment_url;
+        const transactionId = response.data.data.onepay_transaction_id ;
+        
+        setPaymentUrl(paymentUrl);
+        setTransactionId(transactionId);
+
+        // Process payment using OnePay SDK
+        const onePaySDK = new OnePaySDK();
+        await onePaySDK.processDirectPayment({
+          directGatewayURL: paymentUrl,
+          directTransactionId: transactionId
+        });
       } else {
-        alert("Payment URL not found.");
+        throw new Error("Payment URL not found in response");
       }
     } catch (error: any) {
       console.error(error);
-      alert("Failed to create transaction.");
-    } finally {
       setIsLoading(false);
-    //   setShowThankYouDialog(true);
-
-    // // Call the original onConfirm
-    // onConfirm();
-    };
+      setErrorMessage(error.response?.data?.message || "Failed to create transaction. Please try again.");
+      setShowErrorDialog(true);
+    }
   };
 
   return (
@@ -272,7 +311,7 @@ export function ConfirmationView({
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Processing...
+              Processing Payment...
             </>
           ) : (
             "Confirm & Pay"
@@ -325,7 +364,7 @@ export function ConfirmationView({
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
                   >
-                  Booking Confirmed!
+                  Payment Successful!
                   </motion.span>
                   <motion.span
                     initial={{ scale: 0 }}
@@ -350,7 +389,7 @@ export function ConfirmationView({
                   transition={{ delay: 0.7 }}
                   className="text-lg font-semibold text-gray-900"
                 >
-                Your tickets are booking confirmed!
+                Your payment has been processed successfully!
                 </motion.p>
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -404,6 +443,80 @@ export function ConfirmationView({
               >
                 Back to Event Page
               </Button>
+              </motion.div>
+            </motion.div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <DialogContent className="sm:max-w-lg border-0 bg-white">
+          <div className="relative overflow-hidden">
+            <DialogHeader className="relative z-10">
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-center"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 15,
+                    delay: 0.2,
+                  }}
+                  className="mx-auto mb-4 w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center shadow-lg"
+                >
+                  <AlertCircle className="w-10 h-10 text-white" />
+                </motion.div>
+
+                <DialogTitle className="text-2xl font-bold text-red-600 mb-2">
+                  Payment Error
+                </DialogTitle>
+              </motion.div>
+            </DialogHeader>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="relative z-10 text-center space-y-6 pt-4"
+            >
+              <div className="space-y-3">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                  className="text-lg font-semibold text-gray-900"
+                >
+                  {errorMessage}
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="text-sm text-gray-600 leading-relaxed px-4"
+                >
+                  Please try again or contact support if the problem persists.
+                </motion.p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 }}
+                className="pt-4"
+              >
+                <Button
+                  onClick={() => setShowErrorDialog(false)}
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Try Again
+                </Button>
               </motion.div>
             </motion.div>
           </div>

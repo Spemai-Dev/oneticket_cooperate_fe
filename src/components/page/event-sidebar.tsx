@@ -23,7 +23,7 @@ export function EventSidebar() {
 
   const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } = useBooking();
 
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID;
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
 
 useEffect(() => {
   if (!EVENT_ID) {
