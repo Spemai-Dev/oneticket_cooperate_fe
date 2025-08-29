@@ -1,0 +1,32 @@
+runtime: nodejs22
+service: oneticket-cooperate-fe
+env: standard
+
+env_variables:
+  NODE_ENV: 'production'
+
+handlers:
+  # Long-cache Next.js build assets
+  - url: /_next/static
+    static_dir: .next/static
+    http_headers:
+      Cache-Control: public, max-age=31536000, immutable
+    secure: always
+
+  # Public assets (favicon, images, etc.)
+  - url: /(favicon\.ico|robots\.txt|sitemap\.xml)
+    static_files: public/\1
+    upload: public/(favicon\.ico|robots\.txt|sitemap\.xml)
+    secure: always
+
+  - url: /(.*\.(png|jpg|jpeg|gif|svg|webp|avif|ico|txt|xml|woff|woff2|ttf|eot))
+    static_files: public/\1
+    upload: public/.*\.(png|jpg|jpeg|gif|svg|webp|avif|ico|txt|xml|woff|woff2|ttf|eot)
+    http_headers:
+      Cache-Control: public, max-age=604800
+    secure: always
+
+  # Everything else goes to your Node server (Next.js)
+  - url: /.*
+    script: auto
+    secure: always
