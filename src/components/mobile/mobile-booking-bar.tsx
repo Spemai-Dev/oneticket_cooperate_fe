@@ -8,21 +8,32 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TicketTier } from "@/components/page/ticket-tier";
 
+interface Ticket {
+  id: number;
+  ticket_name: string;
+  ticket_amount?: string;
+  ticket_visualize_amount?: string;
+  remaining_tickets: string;
+  is_delete:boolean,
+  is_sold_out: boolean;
+  is_active?: boolean;
+  is_free_ticket?: boolean;
+  is_compulsory?: boolean;
+  show_remaining_tickets?: boolean;
+}
+
 interface MobileBookingBarProps {
-  quantities: {
-    standard: number;
-    premium: number;
-    vip: number;
-    group: number;
-  };
-  updateQuantity: (tier: string, newQuantity: number) => void;
+  quantities: Record<number, number>;
+  updateQuantity: (ticketId: number, newQuantity: number) => void;
   grandTotal: number;
+  tickets: Ticket[];
 }
 
 export function MobileBookingBar({
   quantities,
   updateQuantity,
   grandTotal,
+  tickets,
 }: MobileBookingBarProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -83,13 +94,6 @@ export function MobileBookingBar({
     (sum, qty) => sum + (qty || 0),
     0
   );
-
-  const ticketData = [
-    { key: "standard", name: "Standard Access", price: "LKR 6,000" },
-    { key: "premium", name: "Premium Delegate", price: "LKR 8,500" },
-    { key: "vip", name: "VIP Executive Pass", price: "LKR 12,000" },
-    { key: "group", name: "Group Package (5 Pax)", price: "LKR 25,000" },
-  ];
 
   return (
     <>
@@ -182,18 +186,17 @@ export function MobileBookingBar({
               {/* Ticket Selection */}
               <div className="flex-1 overflow-y-auto px-4">
                 <div className="space-y-1 py-4">
-                  {ticketData.map((ticket) => (
-                    <TicketTier
-                      key={ticket.key}
-                      name={ticket.name}
-                      price={ticket.price}
-                      quantity={
-                        quantities[ticket.key as keyof typeof quantities] || 0
-                      }
+                  {tickets
+                    .filter(ticket => !ticket.is_delete)
+                    .map(ticket => (
+                      <TicketTier
+                        key={ticket.id}
+                        ticket={ticket}
+                        quantity={quantities[ticket.id] || 0}
                       onQuantityChange={(newQuantity) =>
-                        updateQuantity(ticket.key, newQuantity)
+                        updateQuantity(ticket.id, newQuantity)
                       }
-                    />
+                      />
                   ))}
                 </div>
               </div>
@@ -231,8 +234,20 @@ export function MobileBookingBar({
                         (sum, qty) => sum + qty,
                         0
                       );
-                      if (totalTickets === 0) {
-                        toast.error("Please select at least one ticket", {
+
+                      // Check compulsory tickets
+                      const compulsoryTickets = tickets.filter(
+                        (ticket) => ticket.is_compulsory && !ticket.is_delete
+                      );
+                      const missingCompulsory = compulsoryTickets.some(
+                        (ticket) => !(quantities[ticket.id] > 0)
+                      );
+                      if (totalTickets === 0 || missingCompulsory) {
+                        toast.error(
+                          missingCompulsory
+                            ? "Please select at least one from all compulsory tickets"
+                            : "Please select at least one ticket",
+                          {
                           style: {
                             background: "#fff",
                             border: "1px solid #e2e8f0",

@@ -5,26 +5,43 @@ import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TicketTierProps {
-  name: string;
-  price: string;
+  ticket: any;
   quantity: number;
   onQuantityChange: (newQuantity: number) => void;
 }
 
 export function TicketTier({
-  name,
-  price,
-  quantity,
-  onQuantityChange,
+ticket, quantity, onQuantityChange 
 }: TicketTierProps) {
-  // Parse price to number for calculations (assuming format like "LKR 6,000")
-  const priceNumber = parseFloat(price.replace(/[^0-9.]/g, ""));
-  const totalCost = quantity * priceNumber;
+  const remaining = parseInt(ticket.remaining_tickets);
+  const isDisabled =
+    !ticket.is_active || ticket.is_sold_out || remaining === 0;
 
+  const priceNumber = parseFloat(ticket.ticket_amount || "0");
+  const priceLabel = ticket.is_free_ticket ? "Free" : `LKR ${priceNumber.toLocaleString()}`;
+  const totalCost = ticket.is_free_ticket ? 0 : quantity * priceNumber;
+
+  const disableMinus = quantity <= 0 || isDisabled;
+  const disablePlus = quantity >= remaining || isDisabled;
   return (
     <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 border-b gap-3 sm:gap-0">
       <div className="flex-1 sm:flex-none">
-        <p className="font-semibold text-sm sm:text-base">{name}</p>
+        <p
+          className={`font-semibold text-sm sm:text-base ${
+            ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
+          }`}
+        >
+          {ticket.ticket_name}{" "}
+          {ticket.is_compulsory && (
+            <span className="ml-2 text-xs text-red-500 ">
+              *
+            </span>
+          )}
+          {(ticket.is_sold_out || remaining === 0) && " (Sold Out)"}
+        </p>
+        {ticket.show_remaining_tickets && remaining > 0 && !ticket.is_sold_out && (
+          <p className="text-xs text-gray-500">{remaining} tickets left</p>
+        )}
       </div>
 
       {/* Mobile Layout */}
@@ -40,6 +57,7 @@ export function TicketTier({
                 variant="outline"
                 size="sm"
                 onClick={() => onQuantityChange(Math.max(0, quantity - 1))}
+                disabled={disableMinus}
                 className="transition-colors duration-150 h-8 w-8"
               >
                 <motion.div
@@ -74,6 +92,7 @@ export function TicketTier({
                 variant="outline"
                 size="sm"
                 onClick={() => onQuantityChange(quantity + 1)}
+                disabled={disablePlus}
                 className="transition-colors duration-150 h-8 w-8"
               >
                 <motion.div
@@ -98,7 +117,9 @@ export function TicketTier({
             }}
             className="font-semibold text-sm"
           >
-            {quantity > 0 ? `LKR ${totalCost.toLocaleString()}` : price}
+          {quantity > 0 && !ticket.is_free_ticket
+            ? `LKR ${totalCost.toLocaleString()}`
+            : priceLabel}
           </motion.p>
         </div>
       </div>
@@ -115,6 +136,7 @@ export function TicketTier({
               variant="outline"
               size="icon"
               onClick={() => onQuantityChange(Math.max(0, quantity - 1))}
+              disabled={disableMinus}
               className="transition-colors duration-150 h-8 w-8 md:h-10 md:w-10"
             >
               <motion.div
@@ -149,6 +171,7 @@ export function TicketTier({
               variant="outline"
               size="icon"
               onClick={() => onQuantityChange(quantity + 1)}
+              disabled={disablePlus}
               className="transition-colors duration-150 h-8 w-8 md:h-10 md:w-10"
             >
               <motion.div
@@ -173,7 +196,9 @@ export function TicketTier({
           }}
           className="font-semibold min-w-[4rem] md:min-w-[6rem] text-right text-sm md:text-base"
         >
-          {quantity > 0 ? `LKR ${totalCost.toLocaleString()}` : price}
+          {quantity > 0 && !ticket.is_free_ticket
+            ? `LKR ${totalCost.toLocaleString()}`
+            : priceLabel}
         </motion.p>
       </div>
     </div>

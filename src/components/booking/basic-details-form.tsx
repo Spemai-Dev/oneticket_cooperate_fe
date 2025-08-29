@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BookingData } from "@/app/booking/page";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { useBooking } from "@/context/BookingContext";
 
 interface BasicDetailsFormProps {
   data: BookingData;
@@ -23,7 +24,7 @@ export function BasicDetailsForm({
 }: BasicDetailsFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-
+  const { setPersonalDetails } = useBooking();
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -57,6 +58,13 @@ export function BasicDetailsForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
+    setPersonalDetails({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      contactNumber: data.contactNumber,
+      idNumber: data.idNumber,
+    });
       setIsLoading(true);
       // Simulate validation delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
