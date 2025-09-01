@@ -6,12 +6,25 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface AgendaItemProps {
   time: string;
+  date: string;
   title: string;
   description: string;
+  location: string;
+  tag: string;
   color: string;
+  track?: string;
 }
 
-function AgendaItem({ time, title, description, color }: AgendaItemProps) {
+function AgendaItem({
+  time,
+  date,
+  title,
+  description,
+  location,
+  tag,
+  color,
+  track,
+}: AgendaItemProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -31,19 +44,62 @@ function AgendaItem({ time, title, description, color }: AgendaItemProps) {
         background: `linear-gradient(90deg, ${color} -10.98%, #FFFFFF 124.49%)`,
       }}
     >
-      <motion.p
-        className="text-sm text-muted-foreground"
+      <div className="flex items-center justify-between mb-2">
+        <motion.p
+          className="text-base font-bold text-gray-800"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          {time}
+        </motion.p>
+        <motion.span
+          className="text-xs px-4 py-1 rounded-full bg-emerald-100 border border-[#0E5344] text-[#0E5344] font-medium"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
+        >
+          {tag}
+        </motion.span>
+      </div>
+
+      {track && (
+        <motion.div
+          className="mb-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <span className="text-xs px-3 py-1 rounded-full bg-blue-100 border border-blue-300 text-blue-700 font-medium">
+            {track}
+          </span>
+        </motion.div>
+      )}
+
+      <motion.div
+        className="text-xs text-muted-foreground mb-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: 0.2 }}
       >
-        {time}
-      </motion.p>
+        <span className="mr-4">{date}</span>
+        <span className="flex items-center">
+          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M5.05 4.05a7 0 119.9 9.9L10 18.9l-4.95-4.95a7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {location}
+        </span>
+      </motion.div>
+
       <motion.h4
         className="font-bold"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.25 }}
       >
         {title}
       </motion.h4>
@@ -61,72 +117,356 @@ function AgendaItem({ time, title, description, color }: AgendaItemProps) {
   );
 }
 
+function groupByTime(agenda: AgendaItemProps[]) {
+  const grouped: { time: string; items: AgendaItemProps[] }[] = [];
+  agenda.forEach((item) => {
+    const existing = grouped.find((g) => g.time === item.time);
+    if (existing) {
+      existing.items.push(item);
+    } else {
+      grouped.push({ time: item.time, items: [item] });
+    }
+  });
+  return grouped;
+}
+
 const day1Agenda = [
   {
-    time: "06:00 PM - 06:30 PM",
-    title: "Guest Arrival & Welcome Drinks",
-    description: "",
+    time: "09:00 AM – 09:30 AM",
+    date: "29 September 2025",
+    title: "Opening Ceremony & Welcome Address",
+    description:
+      "Speech by the President on the AI Framework and establishment of Center for AI Excellence (AI Fund)",
+    location: "Main Auditorium",
+    tag: "Opening",
     color: "#F0F8FF",
   },
   {
-    time: "06:30 PM - 06:45 PM",
-    title: "Opening Ceremony",
-    description: "Host's welcome speech and event introduction.",
+    time: "09:30 AM – 10:15 AM",
+    date: "29 September 2025",
+    title:
+      "Keynote 1: National AI Strategy – Contributing to Sri Lanka's Digital Economy",
+    description:
+      "National AI Strategy – Contributing to Sri Lanka's Digital Economy",
+    location: "Main Auditorium",
+    tag: "Keynote",
     color: "#F0FFF0",
   },
   {
-    time: "06:45 PM - 07:30 PM",
-    title: "Keynote Address: Shaping Tomorrow's Business World",
-    description:
-      "An inspiring session on innovation and leadership in the corporate sector.",
+    time: "10:15 AM – 11:00 AM",
+    date: "29 September 2025",
+    title: "Panel: AI Implementation Challenges – From Investment to Impact",
+    description: "AI Implementation Challenges – From Investment to Impact",
+    location: "Main Auditorium",
+    tag: "Session",
     color: "#FFFFF0",
   },
   {
-    time: "07:30 PM - 08:15 PM",
-    title: "Panel Discussion: The Future of Corporate Collaboration",
-    description:
-      "Industry leaders share insights on trends, challenges, and opportunities.",
+    time: "11:00 AM – 11:15 AM",
+    date: "29 September 2025",
+    title: "Tea Break",
+    description: "Networking opportunity with refreshments.",
+    location: "Exhibition Hall",
+    tag: "Break",
     color: "#FFF5EE",
   },
   {
-    time: "08:15 PM - 08:30 PM",
-    title: "Tea & Networking Break",
-    description: "",
+    time: "11:15 AM – 12:00 PM",
+    date: "29 September 2025",
+    title: "Keynote 2: Responsible AI – Ethics, Governance & Trust",
+    description: "Responsible AI – Ethics, Governance & Trust",
+    location: "Main Auditorium",
+    tag: "Keynote",
     color: "#F5FFFA",
   },
   {
-    time: "08:30 PM - 09:15 PM",
-    title: "Award Ceremony: Recognizing Excellence",
-    description: "Celebrating outstanding performers and contributors.",
+    time: "12:00 PM – 12:45 PM",
+    date: "29 September 2025",
+    title: "Fireside Chat: Global Lessons in AI Strategy Execution",
+    description: "Global Lessons in AI Strategy Execution",
+    location: "Main Auditorium",
+    tag: "Session",
     color: "#FFF0F5",
   },
   {
-    time: "09:15 PM - 10:45 PM",
-    title: "Dinner & Networking",
-    description:
-      "A buffet dinner accompanied by live music and open networking.",
+    time: "12:45 PM – 02:00 PM",
+    date: "29 September 2025",
+    title: "Lunch Break",
+    description: "Connect with speakers and attendees over lunch.",
+    location: "Garden Terrace",
+    tag: "Break",
     color: "#F0FFF0",
   },
   {
-    time: "10:45 PM - 11:15 PM",
-    title: "Entertainment Segment",
-    description: "Live band, dance act, or stand-up comedy performance.",
+    time: "02:00 PM – 02:45 PM",
+    date: "29 September 2025",
+    title:
+      "Speech: AI Strategy Enablement – Policy, Infrastructure & Data Governance",
+    description:
+      "AI Strategy Enablement – Policy, Infrastructure & Data Governance",
+    location: "Room A",
+    tag: "Session",
+    color: "#F0F8FF",
+    track: "Track A",
+  },
+  {
+    time: "02:00 PM – 02:45 PM",
+    date: "29 September 2025",
+    title: "AI for Business Strategy – ROI, Efficiency & Innovation",
+    description: "AI for Business Strategy – ROI, Efficiency & Innovation",
+    location: "Room B",
+    tag: "Session",
+    color: "#F5FFFA",
+    track: "Track B",
+  },
+  {
+    time: "02:45 PM – 03:30 PM",
+    date: "29 September 2025",
+    title:
+      "Panel: Citizen Services Powered by AI – Health, Education, Public Safety",
+    description:
+      "Citizen Services Powered by AI – Health, Education, Public Safety",
+    location: "Room A",
+    tag: "Session",
+    color: "#FFFFF0",
+    track: "Track A",
+  },
+  {
+    time: "02:45 PM – 03:30 PM",
+    date: "29 September 2025",
+    title: "Panel: Sector-Specific AI Applications – Telco, Finance, Retail",
+    description: "Sector-Specific AI Applications – Telco, Finance, Retail",
+    location: "Room B",
+    tag: "Session",
+    color: "#FFF0F5",
+    track: "Track B",
+  },
+  {
+    time: "03:30 PM – 04:00 PM",
+    date: "29 September 2025",
+    title: "Speech: Bridging Generational Gaps in AI Literacy",
+    description: "Bridging Generational Gaps in AI Literacy",
+    location: "Room A",
+    tag: "Session",
+    color: "#F0FFF0",
+    track: "Track A",
+  },
+  {
+    time: "03:30 PM – 04:00 PM",
+    date: "29 September 2025",
+    title:
+      "Speech: Talent & Skills & Building the Culture for AI-Driven Enterprises",
+    description:
+      "Talent & Skills & Building the Culture for AI-Driven Enterprises",
+    location: "Room B ",
+    tag: "Session",
+    color: "#F5FFFA",
+    track: "Track B",
+  },
+  {
+    time: "04:00 PM – 04:30 PM",
+    date: "29 September 2025",
+    title: "Panel: Localizing AI for Sri Lanka – Language, Culture & Access",
+    description: "Localizing AI for Sri Lanka – Language, Culture & Access",
+    location: "Room A",
+    tag: "Session",
+    color: "#FFF5EE",
+    track: "Track A",
+  },
+  {
+    time: "04:00 PM – 04:30 PM",
+    date: "29 September 2025",
+    title: "Panel: Scaling AI in SMEs & Corporates",
+    description: "Scaling AI in SMEs & Corporates",
+    location: "Room B",
+    tag: "Session",
+    color: "#F0F8FF",
+    track: "Track B",
+  },
+  {
+    time: "04:30 PM – 05:30 PM",
+    date: "29 September 2025",
+    title: "Afternoon Tea Break",
+    description: "Networking opportunity with refreshments.",
+    location: "Exhibition Hall",
+    tag: "Break",
+    color: "#FFFFF0",
+  },
+];
+
+const day2Agenda = [
+  {
+    time: "09:00 AM – 09:30 AM",
+    date: "30 September 2025",
+    title: "Day 2 Opening",
+    description: "Start of Day 2 activities",
+    location: "Main Auditorium",
+    tag: "Opening",
     color: "#F0F8FF",
   },
   {
-    time: "11:15 PM - 11:45 PM",
-    title: "Fireside Chat: Building Stronger Business Communities",
-    description: "A casual yet insightful conversation with business leaders.",
+    time: "09:30 AM – 10:15 AM",
+    date: "30 September 2025",
+    title: "Keynote 1: AI Adoption Challenges – Skills, Localization & Inclusion",
+    description:
+      "AI Adoption Challenges – Skills, Localization & Inclusion. Case Study from Singapore.",
+    location: "Main Auditorium",
+    tag: "Keynote",
+    color: "#F0FFF0",
+  },
+  {
+    time: "10:15 AM – 11:00 AM",
+    date: "30 September 2025",
+    title: "Panel: Building AI Talent Pipelines for National Growth",
+    description: "Building AI Talent Pipelines for National Growth",
+    location: "Main Auditorium",
+    tag: "Session",
+    color: "#FFFFF0",
+  },
+  {
+    time: "11:00 AM – 11:15 AM",
+    date: "30 September 2025",
+    title: "Tea Break",
+    description: "Networking opportunity with refreshments.",
+    location: "Exhibition Hall",
+    tag: "Break",
+    color: "#FFF5EE",
+  },
+  {
+    time: "11:15 AM – 12:00 PM",
+    date: "30 September 2025",
+    title: "Keynote 2: National ambitions meets market reality",
+    description:
+      "Public-private cooperations in AI Use Case Implementation.",
+    location: "Main Auditorium",
+    tag: "Keynote",
     color: "#F5FFFA",
   },
   {
-    time: "11:45 PM - 12:00 AM",
-    title: "Closing Remarks & After-Party Launch",
-    description:
-      "Final words from the host followed by music and dancing until midnight.",
+    time: "12:00 PM – 12:45 PM",
+    date: "30 September 2025",
+    title: "Fireside Chat: Sector Innovation",
+    description: "AI in Telecom, Agriculture, Healthcare, BFSI",
+    location: "Main Auditorium",
+    tag: "Session",
     color: "#FFF0F5",
   },
+  {
+    time: "12:45 PM – 02:00 PM",
+    date: "30 September 2025",
+    title: "Lunch Break",
+    description: "Explore the exhibition hall and connect with sponsors.",
+    location: "Expo Hall",
+    tag: "Break",
+    color: "#F0FFF0",
+  },
+  {
+    time: "02:00 PM – 02:45 PM",
+    date: "30 September 2025",
+    title: "Speech: AI for Inclusive Governance – Reaching Every Citizen",
+    description: "AI for Inclusive Governance – Reaching Every Citizen",
+    location: "Room A",
+    tag: "Session",
+    color: "#FFFFF0",
+    track: "Track A",
+  },
+  {
+    time: "02:00 PM – 02:45 PM",
+    date: "30 September 2025",
+    title: "Speech: AI in Work Augmentation, Automation & Autonomous Operations",
+    description: "AI in Work Augmentation, Automation & Autonomous Operations",
+    location: "Room B",
+    tag: "Session",
+    color: "#FFFFF0",
+    track: "Track B",
+  },
+  {
+    time: "02:45 PM – 03:30 PM",
+    date: "30 September 2025",
+    title: "Panel: AI for National Resilience – Climate, Disaster, Health",
+    description: "AI for National Resilience – Climate, Disaster, Health",
+    location: "Room A",
+    tag: "Session",
+    color: "#F0F8FF",
+    track: "Track A",
+  },
+  {
+    time: "02:45 PM – 03:30 PM",
+    date: "30 September 2025",
+    title: "Panel: AI in Customer Experience & Personalization",
+    description: "AI in Customer Experience & Personalization",
+    location: "Room B",
+    tag: "Session",
+    color: "#F0F8FF",
+    track: "Track B",
+  },
+  {
+    time: "03:30 PM – 04:00 PM",
+    date: "30 September 2025",
+    title: "Workshop: Designing Citizen-Centric AI Services",
+    description: "Designing Citizen-Centric AI Services",
+    location: "Room A",
+    tag: "Session",
+    color: "#FFF5EE",
+    track: "Track A",
+  },
+  {
+    time: "03:30 PM – 04:00 PM",
+    date: "30 September 2025",
+    title: "Workshop: Building AI-Ready Business Models",
+    description: "Alternative Hyperscaler Hands-on session",
+    location: "Room B",
+    tag: "Session",
+    color: "#FFF5EE",
+    track: "Track B",
+  },
+  {
+    time: "04:00 PM – 04:30 PM",
+    date: "30 September 2025",
+    title: "Tea Break",
+    description: "Networking opportunity with refreshments.",
+    location: "Exhibition Hall",
+    tag: "Break",
+    color: "#F0FFF0",
+  },
+  {
+    time: "04:00 PM – 04:30 PM",
+    date: "30 September 2025",
+    title: "Awards & Recognitions",
+    description: "Hackathon / Stalls / Open Innovation",
+    location: "Main Auditorium",
+    tag: "Ceremony",
+    color: "#F5FFFA",
+  },
+  {
+    time: "04:30 PM – 05:00 PM",
+    date: "30 September 2025",
+    title: "Closing Keynote and Future Roadmap",
+    description: "Vision for the future of AI and its impact on society.",
+    location: "Main Auditorium",
+    tag: "Keynote",
+    color: "#F0FFF0",
+  },
+  {
+    time: "05:00 PM – 05:15 PM",
+    date: "30 September 2025",
+    title: "Vote of Thanks",
+    description: "Closing remarks and acknowledgments.",
+    location: "Main Auditorium",
+    tag: "Ceremony",
+    color: "#FFF0F5",
+  },
+  {
+    time: "05:15 PM onwards",
+    date: "30 September 2025",
+    title: "Cocktails & Networking",
+    description: "End the conference with cocktails and networking opportunities.",
+    location: "Garden Terrace",
+    tag: "Networking",
+    color: "#F5FFFA",
+  },
 ];
+
 
 export function Agenda() {
   const [activeTab, setActiveTab] = useState("Day 1");
@@ -186,22 +526,27 @@ export function Agenda() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="relative"
           >
-            {day1Agenda
-              .slice(0, showFullAgenda ? day1Agenda.length : 4)
-              .map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: index * 0.1,
-                    duration: 0.4,
-                    ease: "easeOut",
-                  }}
-                >
-                  <AgendaItem {...item} />
-                </motion.div>
-              ))}
+            {groupByTime(
+              day1Agenda.slice(0, showFullAgenda ? day1Agenda.length : 4)
+            ).map((group, groupIndex) => (
+              <motion.div
+                key={group.time}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: groupIndex * 0.1,
+                  duration: 0.4,
+                  ease: "easeOut",
+                }}
+                className={`grid gap-4 ${
+                  group.items.length > 1 ? "sm:grid-cols-2" : "sm:grid-cols-1"
+                }`}
+              >
+                {group.items.map((item) => (
+                  <AgendaItem key={item.title} {...item} />
+                ))}
+              </motion.div>
+            ))}
 
             <AnimatePresence mode="wait">
               {!showFullAgenda && (
@@ -272,79 +617,90 @@ export function Agenda() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="relative overflow-hidden"
+            className="relative"
           >
-            <motion.div className="p-8 rounded-3xl bg-gradient-to-br from-[#0E5344] to-[#1a7a5c] text-white text-center relative">
+            {groupByTime(
+              day2Agenda.slice(0, showFullAgenda ? day2Agenda.length : 4)
+            ).map((group, groupIndex) => (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                animate={{ x: ["-100%", "100%"] }}
+                key={group.time}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  ease: "linear",
+                  delay: groupIndex * 0.1,
+                  duration: 0.4,
+                  ease: "easeOut",
                 }}
-              />
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="relative z-10"
+                className={`grid gap-4 ${
+                  group.items.length > 1 ? "sm:grid-cols-2" : "sm:grid-cols-1"
+                }`}
               >
-                <motion.div
-                  className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12,6 12,12 16,14" />
-                  </svg>
-                </motion.div>
-                <motion.h3
-                  className="text-xl font-bold mb-2"
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  Day 2 Agenda
-                </motion.h3>
-                <motion.p
-                  className="text-white/80 text-sm"
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                >
-                  Something amazing is coming soon...
-                </motion.p>
-                <motion.div
-                  className="mt-4 flex justify-center space-x-1"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                >
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 bg-white/60 rounded-full"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        delay: i * 0.2,
-                      }}
-                    />
-                  ))}
-                </motion.div>
+                {group.items.map((item) => (
+                  <AgendaItem key={item.title} {...item} />
+                ))}
               </motion.div>
-            </motion.div>
+            ))}
+
+            <AnimatePresence mode="wait">
+              {!showFullAgenda && (
+                <motion.div
+                  key="see-more-overlay-day2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="absolute bottom-0 left-0 right-0 z-10 pt-16 pb-4"
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-b from-transparent via-[#f6f7f9]/80 to-[#f6f7f9] pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                  <motion.div
+                    className="relative z-10 text-center"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                  >
+                    <motion.button
+                      onClick={() => setShowFullAgenda(true)}
+                      className="px-6 py-2 bg-[#0E5344] hover:bg-[#0E5344]/90 cursor-pointer text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200 text-xs sm:text-sm"
+                      whileTap={{ scale: 0.95 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                      }}
+                    >
+                      See Full Agenda
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {showFullAgenda && (
+                <motion.div
+                  key="see-less-button-day2"
+                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                  transition={{ duration: 0.5, ease: "easeInOut", delay: 0.2 }}
+                  className="text-center mt-4"
+                >
+                  <motion.button
+                    onClick={() => setShowFullAgenda(false)}
+                    className="px-6 py-2 bg-gray-100 text-xs  text-gray-500 cursor-pointer rounded-full border border-gray-200 font-semibold hover:bg-gray-200 transition-all duration-200"
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  >
+                    See Less
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

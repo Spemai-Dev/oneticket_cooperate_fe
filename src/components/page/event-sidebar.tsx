@@ -209,7 +209,7 @@ onClick={handleGetTickets}
         {/* Event Info */}
         {eventDetails && (
           <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
-            <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg">
+            <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
               {new Date(eventDetails.event_datetime).toLocaleDateString(
                 "en-US",
                 {
@@ -251,9 +251,9 @@ onClick={handleGetTickets}
           </div>
         )}
 
-        <div className="pt-4 hidden lg:block">
+        {/* <div className="pt-4 hidden lg:block">
           <EventLineup />
-        </div>
+        </div> */}
         <div className="pt-4 hidden lg:block">
           <AboutEvent />
         </div>
