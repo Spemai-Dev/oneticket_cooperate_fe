@@ -43,7 +43,7 @@ export default function RootLayout({
       </head>
       <body className={`bg-[#F6F7F9] antialiased`} suppressHydrationWarning>
         <Head>
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+          <meta key="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         </Head>
         <SmoothScroller />
         <Navigation />
