@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/ui/stepper";
 import { BasicDetailsForm } from "@/components/booking/basic-details-form";
 import { AdditionalDetailsForm } from "@/components/booking/additional-details-form";
 import { ConfirmationView } from "@/components/booking/confirmation-view";
+import axios from "axios";
+import { environment } from "@/config/data";
 
 export interface BookingData {
   // Basic Details
@@ -14,11 +16,14 @@ export interface BookingData {
   email: string;
   contactNumber: string;
   idNumber: string;
+  [key: string]: string;
+}
 
-  // Additional Details
-  companyName: string;
-  designation: string;
-  branchName: string;
+export interface Field {
+  id: number;
+  field_name: string;
+  field_regex?: string;
+  is_required?: boolean;
 }
 
 const initialBookingData: BookingData = {
@@ -27,15 +32,43 @@ const initialBookingData: BookingData = {
   email: "",
   contactNumber: "",
   idNumber: "",
-  companyName: "",
-  designation: "",
-  branchName: "",
 };
 
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [bookingData, setBookingData] =
     useState<BookingData>(initialBookingData);
+  const [fields, setFields] = useState<Field[]>([]);
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
+
+  // Fetch dynamic fields from API
+  useEffect(() => {
+    const fetchFields = async () => {
+      try {
+        const res = await axios.get(
+          `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
+        );
+        const apiFields: Field[] = res.data?.data?.fields || [];
+
+        // Initialize bookingData with dynamic fields
+        const dynamicFieldsData: Record<string, string> = {};
+        apiFields.forEach((f) => {
+          dynamicFieldsData[f.field_name] = "";
+        });
+
+        setBookingData((prev) => ({
+          ...prev,
+          ...dynamicFieldsData,
+        }));
+
+        setFields(apiFields);
+      } catch (err) {
+        console.error("Failed to fetch fields", err);
+      }
+    };
+
+    fetchFields();
+  }, [EVENT_ID]);
 
   const steps = ["Personal Details", "Additional Info", "Confirmation"];
 
@@ -52,7 +85,14 @@ export default function BookingPage() {
   };
 
   const updateBookingData = (data: Partial<BookingData>) => {
-    setBookingData((prev) => ({ ...prev, ...data }));
+    // Ensure all values are strings
+    setBookingData((prev) => {
+      const updated: BookingData = { ...prev };
+      Object.keys(data).forEach((key) => {
+        updated[key] = data[key] || "";
+      });
+      return updated;
+    });
   };
 
   const renderCurrentStep = () => {
@@ -72,6 +112,7 @@ export default function BookingPage() {
             onUpdate={updateBookingData}
             onNext={handleNext}
             onBack={handleBack}
+            fields={fields}
           />
         );
       case 3:

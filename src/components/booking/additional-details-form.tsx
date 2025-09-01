@@ -6,22 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BookingData } from "@/app/booking/page";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { useBooking } from "@/context/BookingContext";
+
+export interface Field {
+  id: number;
+  field_name: string;
+  field_regex?: string; // optional now
+  is_required?: boolean;
+}
 
 interface AdditionalDetailsFormProps {
   data: BookingData;
   onUpdate: (data: Partial<BookingData>) => void;
   onNext: () => void;
   onBack: () => void;
+  fields: Field[];
 }
 
 export function AdditionalDetailsForm({
@@ -29,24 +31,29 @@ export function AdditionalDetailsForm({
   onUpdate,
   onNext,
   onBack,
+  fields,
 }: AdditionalDetailsFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-
+const { setAdditionalDetails } = useBooking();
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!data.companyName.trim()) {
-      newErrors.companyName = "Company name is required";
-    }
+    fields.forEach((field) => {
+      const value = data[field.field_name]?.trim() || "";
 
-    if (!data.designation.trim()) {
-      newErrors.designation = "Designation is required";
-    }
+      if (field.is_required && !value) {
+        newErrors[field.field_name] = `${field.field_name} is required`;
+        return;
+      }
 
-    if (!data.branchName.trim()) {
-      newErrors.branchName = "Branch name is required";
-    }
+      if (field.field_regex) {
+        const regex = new RegExp(field.field_regex);
+        if (value && !regex.test(value)) {
+          newErrors[field.field_name] = `Invalid ${field.field_name}`;
+        }
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -63,13 +70,13 @@ export function AdditionalDetailsForm({
     }
   };
 
-  const handleInputChange = (field: keyof BookingData, value: string) => {
-    onUpdate({ [field]: value });
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
+const handleInputChange = (fieldName: string, value: string) => {
+  onUpdate({ [fieldName]: value });  // keeps local form state
+  setAdditionalDetails(prev => ({ ...prev, [fieldName]: value })); // update context
+  if (errors[fieldName]) {
+    setErrors((prev) => ({ ...prev, [fieldName]: "" }));
+  }
+};
 
   return (
     <motion.div
@@ -81,147 +88,38 @@ export function AdditionalDetailsForm({
         <CardContent className="p-0">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="space-y-2"
-              >
-                <Label
-                  htmlFor="companyName"
-                  className="text-sm font-medium text-gray-700"
+              {fields.map((field, index) => (
+                <motion.div
+                  key={field.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * (index + 1) }}
+                  className="space-y-2"
                 >
-                  Company Name *
-                </Label>
-                <Input
-                  id="companyName"
-                  type="text"
-                  placeholder="Enter your company name"
-                  value={data.companyName}
-                  onChange={(e) =>
-                    handleInputChange("companyName", e.target.value)
-                  }
-                  className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
-                    errors.companyName &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                  )}
-                />
-                {errors.companyName && (
-                  <motion.p
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="text-sm text-red-500"
-                  >
-                    {errors.companyName}
-                  </motion.p>
-                )}
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-2"
-              >
-                <Label
-                  htmlFor="designation"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Designation *
-                </Label>
-                <Select
-                  value={data.designation}
-                  onValueChange={(value) =>
-                    handleInputChange("designation", value)
-                  }
-                >
-                  <SelectTrigger
+                  <Label className="text-sm font-medium text-gray-700">
+                    {field.field_name} {field.is_required && <span className="text-red-500">*</span>}
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder={`Enter ${field.field_name}`}
+                    value={data[field.field_name] || ""}
+                    onChange={(e) => handleInputChange(field.field_name, e.target.value)}
                     className={cn(
                       "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
-                      errors.designation &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      errors[field.field_name] && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                     )}
-                  >
-                    <SelectValue placeholder="Select your designation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ceo">CEO</SelectItem>
-                    <SelectItem value="cto">CTO</SelectItem>
-                    <SelectItem value="cfo">CFO</SelectItem>
-                    <SelectItem value="director">Director</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="senior-manager">
-                      Senior Manager
-                    </SelectItem>
-                    <SelectItem value="assistant-manager">
-                      Assistant Manager
-                    </SelectItem>
-                    <SelectItem value="team-lead">Team Lead</SelectItem>
-                    <SelectItem value="senior-developer">
-                      Senior Developer
-                    </SelectItem>
-                    <SelectItem value="developer">Developer</SelectItem>
-                    <SelectItem value="junior-developer">
-                      Junior Developer
-                    </SelectItem>
-                    <SelectItem value="analyst">Analyst</SelectItem>
-                    <SelectItem value="consultant">Consultant</SelectItem>
-                    <SelectItem value="coordinator">Coordinator</SelectItem>
-                    <SelectItem value="specialist">Specialist</SelectItem>
-                    <SelectItem value="executive">Executive</SelectItem>
-                    <SelectItem value="associate">Associate</SelectItem>
-                    <SelectItem value="intern">Intern</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.designation && (
-                  <motion.p
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="text-sm text-red-500"
-                  >
-                    {errors.designation}
-                  </motion.p>
-                )}
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-2"
-              >
-                <Label
-                  htmlFor="branchName"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Branch Name *
-                </Label>
-                <Input
-                  id="branchName"
-                  type="text"
-                  placeholder="Enter your branch name"
-                  value={data.branchName}
-                  onChange={(e) =>
-                    handleInputChange("branchName", e.target.value)
-                  }
-                  className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
-                    errors.branchName &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  />
+                  {errors[field.field_name] && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-sm text-red-500"
+                    >
+                      {errors[field.field_name]}
+                    </motion.p>
                   )}
-                />
-                {errors.branchName && (
-                  <motion.p
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="text-sm text-red-500"
-                  >
-                    {errors.branchName}
-                  </motion.p>
-                )}
-              </motion.div>
+                </motion.div>
+              ))}
             </div>
 
             <motion.div

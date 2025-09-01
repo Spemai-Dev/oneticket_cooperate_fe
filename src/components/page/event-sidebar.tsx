@@ -1,88 +1,166 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Clock, MapPin } from "lucide-react";
 import { TicketTier } from "./ticket-tier";
-import { Clock, MapPin } from "lucide-react";
 import { EventLineup } from "./event-lineup";
 import { AboutEvent } from "./about-event";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { MobileBookingBar } from "@/components/mobile/mobile-booking-bar";
 import { toast } from "sonner";
+import { useBooking } from "@/context/BookingContext";
+import axios from "axios";
+import { environment } from "@/config/data";
 
 export function EventSidebar() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [quantities, setQuantities] = useState({
-    standard: 0,
-    premium: 0,
-    vip: 0,
-    group: 0,
-  });
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [eventDetails, setEventDetails] = useState<any>(null);
 
-  const ticketPrices = {
-    standard: 6000,
-    premium: 8500,
-    vip: 12000,
-    group: 25000,
+  const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } = useBooking();
+
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
+
+useEffect(() => {
+  if (!EVENT_ID) {
+    toast.error("Event ID is not set!");
+    return;
+  }
+
+  const fetchEvent = async () => {
+    try {
+      const res = await axios.get(
+        `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
+      );
+      const data = res.data?.data;
+
+      if (!data) {
+        toast.error("Event not found");
+        return;
+      }
+
+      setEventDetails(data);
+
+      // save eventMeta immediately
+      setEventMeta({
+        id: data.id,
+        name: data.event_name,
+        dateTime: data.event_datetime,
+        expireOn: data.event_expire_on,
+        venue: data.venue,
+        currency: data.tickets_currency,
+      });
+
+      // filter out deleted tickets
+      const validTickets = (data.tickets || []).filter(
+        (t: any) => !t.is_delete
+      );
+      setTickets(validTickets);
+
+      // initialize ticket quantities
+      const initialQuantities: Record<number, number> = {};
+      validTickets.forEach((t: any) => {
+        initialQuantities[t.id] = t.is_compulsory ? 1 : 0;
+      });
+      setQuantities(initialQuantities);
+
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      toast.error("Failed to load event details");
+    }
   };
 
-  const updateQuantity = (
-    tier: keyof typeof quantities,
-    newQuantity: number
-  ) => {
+  fetchEvent();
+}, [EVENT_ID]);
+
+  // Update quantity — pure, no context updates here
+  const updateQuantity = (ticketId: number, newQuantity: number) => {
     setQuantities((prev) => ({
       ...prev,
-      [tier]: Math.max(0, newQuantity),
+      [ticketId]: Math.max(0, newQuantity),
     }));
   };
 
-  const grandTotal = Object.entries(quantities).reduce(
-    (total, [tier, quantity]) => {
-      return total + quantity * ticketPrices[tier as keyof typeof ticketPrices];
-    },
+  // Sync selected tickets whenever tickets or quantities change
+  useEffect(() => {
+    if (tickets.length === 0) return;
+
+    setSelectedTicketsFromQuantities(tickets, quantities);
+  }, [tickets, quantities]);
+
+  const grandTotal = tickets.reduce((total, ticket) => {
+    const qty = quantities[ticket.id] || 0;
+    const price = ticket.is_free_ticket
+      ? 0
+      : parseFloat(ticket.ticket_amount || "0");
+    return total + qty * price;
+  }, 0);
+
+  const handleGetTickets = async () => {
+  const totalTickets = Object.values(quantities).reduce(
+    (sum, qty) => sum + qty,
     0
   );
+
+  // Check compulsory tickets
+  const visibleTickets = tickets.filter((t) => !t.is_delete);
+  const compulsoryTickets = visibleTickets.filter((t) => t.is_compulsory);
+  const missingCompulsory = compulsoryTickets.some(
+    (t) => !(quantities[t.id] > 0)
+  );
+
+  if (totalTickets === 0 || missingCompulsory) {
+    toast.error(
+      missingCompulsory
+        ? "Please select at least one from all compulsory tickets"
+        : "Please select at least one ticket"
+    );
+    return;
+  }
+
+  // 🔹 This updates context → which triggers localStorage update automatically
+  setSelectedTicketsFromQuantities(tickets, quantities);
+
+  setEventMeta({
+    id: eventDetails.id,
+    name: eventDetails.event_name,
+    dateTime: eventDetails.event_datetime,
+    expireOn: eventDetails.event_expire_on,
+    venue: eventDetails.venue,
+    currency: eventDetails.tickets_currency,
+  });
+
+  setDynamicFields(eventDetails.fields || []);
+
+  setIsLoading(true);
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  router.push("/booking");
+};
 
   return (
     <>
       <div className="w-full lg:col-span-1 space-y-4">
         <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
-          <TicketTier
-            name="Standard Access"
-            price="LKR 6,000"
-            quantity={quantities.standard}
-            onQuantityChange={(newQuantity) =>
-              updateQuantity("standard", newQuantity)
-            }
-          />
-          <TicketTier
-            name="Premium Delegate"
-            price="LKR 8,500"
-            quantity={quantities.premium}
-            onQuantityChange={(newQuantity) =>
-              updateQuantity("premium", newQuantity)
-            }
-          />
-          <TicketTier
-            name="VIP Executive Pass"
-            price="LKR 12,000"
-            quantity={quantities.vip}
-            onQuantityChange={(newQuantity) =>
-              updateQuantity("vip", newQuantity)
-            }
-          />
-          <TicketTier
-            name="Group Package (5 Pax)"
-            price="LKR 25,000"
-            quantity={quantities.group}
-            onQuantityChange={(newQuantity) =>
-              updateQuantity("group", newQuantity)
-            }
-          />
+          {tickets.length === 0 ? (
+            <p className="text-sm text-gray-500">Loading tickets...</p>
+          ) : (
+            tickets.map((ticket) => (
+              <TicketTier
+                key={ticket.id}
+                ticket={ticket}
+                quantity={quantities[ticket.id] || 0}
+                onQuantityChange={(newQuantity) =>
+                  updateQuantity(ticket.id, newQuantity)
+                }
+              />
+            ))
+          )}
 
+          {/* Total Section */}
           <motion.div
             layout
             initial={false}
@@ -113,28 +191,7 @@ export function EventSidebar() {
           </motion.div>
 
           <Button
-            onClick={async () => {
-              const totalTickets = Object.values(quantities).reduce(
-                (sum, qty) => sum + qty,
-                0
-              );
-              if (totalTickets === 0) {
-                toast.error("Please select at least one ticket", {
-                  style: {
-                    background: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "0.75rem",
-                    boxShadow:
-                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                  },
-                  duration: 3000,
-                });
-                return;
-              }
-              setIsLoading(true);
-              await new Promise((resolve) => setTimeout(resolve, 800));
-              router.push("/booking");
-            }}
+onClick={handleGetTickets}
             disabled={isLoading}
             className="w-full mt-4 sm:mt-6 text-white rounded-full text-sm sm:text-base py-2 sm:py-3 transition-all duration-200 bg-[#0E5344] hover:bg-[#0E5344]/90"
           >
@@ -148,28 +205,52 @@ export function EventSidebar() {
             )}
           </Button>
         </div>
-        <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
-          <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg">
-            Friday, 6 July
-          </h3>
-          <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
-            <div className="sm:col-span-2 space-y-2">
-              <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                <span>6:00pm - 12:00am (6 hours)</span>
+
+        {/* Event Info */}
+        {eventDetails && (
+          <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
+            <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg">
+              {new Date(eventDetails.event_datetime).toLocaleDateString(
+                "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }
+              )}
+            </h3>
+            <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
+              <div className="sm:col-span-2 space-y-2">
+                <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+                  <span>
+                    {new Date(eventDetails.event_datetime).toLocaleTimeString(
+                      [],
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}{" "}
+                    -{" "}
+                    {new Date(eventDetails.event_expire_on).toLocaleTimeString(
+                      [],
+                      { hour: "2-digit", minute: "2-digit" }
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
+                  <span className="leading-relaxed">{eventDetails.venue}</span>
+                </div>
               </div>
-              <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
-                <span className="leading-relaxed">
-                  Cottage Medicare Hospital, 18 Iwaya Rd, Yaba 101245, Lagos
-                </span>
-              </div>
+              <Button className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2">
+                View on map
+              </Button>
             </div>
-            <Button className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2">
-              View on map
-            </Button>
           </div>
-        </div>
+        )}
+
         <div className="pt-4 hidden lg:block">
           <EventLineup />
         </div>
@@ -181,10 +262,9 @@ export function EventSidebar() {
       {/* Mobile Booking Bar */}
       <MobileBookingBar
         quantities={quantities}
-        updateQuantity={(tier, newQuantity) =>
-          updateQuantity(tier as keyof typeof quantities, newQuantity)
-        }
+        updateQuantity={updateQuantity}
         grandTotal={grandTotal}
+        tickets={tickets}
       />
     </>
   );

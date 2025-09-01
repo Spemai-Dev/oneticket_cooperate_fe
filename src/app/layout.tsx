@@ -5,6 +5,7 @@ import { SmoothScroller } from "@/components/layout/smooth-scroller";
 import { Toaster } from "@/components/ui/sonner";
 import "@/lib/suppress-warnings";
 import "./globals.css";
+import { BookingProvider } from "@/context/BookingContext";
 
 export const metadata: Metadata = {
   title:
@@ -40,7 +41,9 @@ export default function RootLayout({
       <body className={`bg-[#F6F7F9] antialiased`} suppressHydrationWarning>
         <SmoothScroller />
         <Navigation />
-        <main>{children}</main>
+        <BookingProvider>
+          <main>{children}</main>
+        </BookingProvider>
         <Footer />
         <Toaster
           position="bottom-right"
