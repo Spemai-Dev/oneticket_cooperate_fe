@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Head from "next/head";
 import { Navigation } from "@/components/layout/navigation";
 import { Footer } from "@/components/layout/footer";
 import { SmoothScroller } from "@/components/layout/smooth-scroller";
@@ -13,12 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "OneTicket | Sri Lanka's Most Convenient Event Hosting & Ticketing Platform",
     description:
       "Discover and host the best events in Sri Lanka with OneTicket. From concerts and festivals to sports and conferences — buy, sell, and manage tickets effortlessly.",
-    viewport: {
-      width: 'device-width',
-      initialScale: 1,
-      maximumScale: 1,
-      userScalable: false,
-    },
     openGraph: {
       title: "OneTicket | Host & Discover Events in Sri Lanka",
       description:
@@ -44,10 +39,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link href="https://fonts.cdnfonts.com/css/inter" rel="stylesheet" />
       </head>
       <body className={`bg-[#F6F7F9] antialiased`} suppressHydrationWarning>
+        <Head>
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        </Head>
         <SmoothScroller />
         <Navigation />
         <BookingProvider>
