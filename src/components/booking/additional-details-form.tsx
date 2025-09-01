@@ -105,8 +105,8 @@ const handleInputChange = (fieldName: string, value: string) => {
                     value={data[field.field_name] || ""}
                     onChange={(e) => handleInputChange(field.field_name, e.target.value)}
                     className={cn(
-                      "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
-                      errors[field.field_name] && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
+                      errors[field.field_name] && "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
                     )}
                   />
                   {errors[field.field_name] && (

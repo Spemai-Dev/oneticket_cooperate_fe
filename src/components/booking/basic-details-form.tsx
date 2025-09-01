@@ -113,9 +113,9 @@ export function BasicDetailsForm({
                       handleInputChange("firstName", e.target.value)
                     }
                     className={cn(
-                      "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
+                      "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base ",
                       errors.firstName &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                        "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
                     )}
                   />
                   {errors.firstName && (
@@ -145,9 +145,9 @@ export function BasicDetailsForm({
                       handleInputChange("lastName", e.target.value)
                     }
                     className={cn(
-                      "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
+                      "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
                       errors.lastName &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                        "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
                     )}
                   />
                   {errors.lastName && (
@@ -181,9 +181,9 @@ export function BasicDetailsForm({
                   value={data.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
+                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
                     errors.email &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
                   )}
                 />
                 {errors.email && (
@@ -221,9 +221,9 @@ export function BasicDetailsForm({
                     handleInputChange("contactNumber", digitsOnly);
                   }}
                   className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
+                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
                     errors.contactNumber &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
                   )}
                 />
                 {errors.contactNumber && (
@@ -258,9 +258,9 @@ export function BasicDetailsForm({
                     handleInputChange("idNumber", e.target.value)
                   }
                   className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20",
+                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
                     errors.idNumber &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                      "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
                   )}
                 />
                 {errors.idNumber && (
