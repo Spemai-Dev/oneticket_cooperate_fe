@@ -48,7 +48,7 @@ export function EventDetails() {
       {/* Event Info Section - Mobile Only */}
       <div className="lg:hidden p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
         <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg">
-          Friday, 29, September
+          29th and 30th September 2025
         </h3>
         <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
           <div className="sm:col-span-2 space-y-2">

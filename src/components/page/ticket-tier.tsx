@@ -27,7 +27,7 @@ ticket, quantity, onQuantityChange
     <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 border-b gap-3 sm:gap-0">
       <div className="flex-1 sm:flex-none">
         <p
-          className={`font-semibold text-sm sm:text-base ${
+          className={`font-semibold text-sm sm:text-base lg:w-24 2xl:w-72 ${
             ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
           }`}
         >
