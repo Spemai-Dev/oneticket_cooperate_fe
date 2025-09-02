@@ -210,7 +210,7 @@ export function EventSidebar() {
         {eventDetails && (
           <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
             <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
-              {new Date(eventDetails.event_datetime).toLocaleDateString(
+              {/* {new Date(eventDetails.event_datetime).toLocaleDateString(
                 "en-US",
                 {
                   weekday: "long",
@@ -218,13 +218,14 @@ export function EventSidebar() {
                   month: "long",
                   day: "numeric",
                 }
-              )}
+              )} */}
+              29th and 30th September 2025
             </h3>
             <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
               <div className="sm:col-span-2 space-y-2">
                 <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                  <span>
+                  {/* <span>
                     {new Date(eventDetails.event_datetime).toLocaleTimeString(
                       [],
                       {
@@ -237,11 +238,15 @@ export function EventSidebar() {
                       [],
                       { hour: "2-digit", minute: "2-digit" }
                     )}
-                  </span>
+                  </span> */}
+                  <span>08:00 AM – 07:00 PM (11 hours)</span>
                 </div>
                 <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="leading-relaxed">{eventDetails.venue}</span>
+                  <span className="leading-relaxed">
+                    {/* {eventDetails.venue} */}
+                    Monarch Imperial, Colombo, Sri Lanka
+                    </span>
                 </div>
               </div>
               <Button
