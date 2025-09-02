@@ -39,7 +39,7 @@ export default function BookingPage() {
   const [bookingData, setBookingData] =
     useState<BookingData>(initialBookingData);
   const [fields, setFields] = useState<Field[]>([]);
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || 'OT4W11909A75BC2F388C5';
 
   // Fetch dynamic fields from API
   useEffect(() => {
