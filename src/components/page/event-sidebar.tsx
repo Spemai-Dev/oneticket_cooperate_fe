@@ -21,61 +21,61 @@ export function EventSidebar() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [eventDetails, setEventDetails] = useState<any>(null);
 
-  const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } = useBooking();
+  const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } =
+    useBooking();
 
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "4XTU119096405A4DE629A";
 
-useEffect(() => {
-  if (!EVENT_ID) {
-    toast.error("Event ID is not set!");
-    return;
-  }
-
-  const fetchEvent = async () => {
-    try {
-      const res = await axios.get(
-        `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
-      );
-      const data = res.data?.data;
-
-      if (!data) {
-        toast.error("Event not found");
-        return;
-      }
-
-      setEventDetails(data);
-
-      // save eventMeta immediately
-      setEventMeta({
-        id: data.id,
-        name: data.event_name,
-        dateTime: data.event_datetime,
-        expireOn: data.event_expire_on,
-        venue: data.venue,
-        currency: data.tickets_currency,
-      });
-
-      // filter out deleted tickets
-      const validTickets = (data.tickets || []).filter(
-        (t: any) => !t.is_delete
-      );
-      setTickets(validTickets);
-
-      // initialize ticket quantities
-      const initialQuantities: Record<number, number> = {};
-      validTickets.forEach((t: any) => {
-        initialQuantities[t.id] = t.is_compulsory ? 1 : 0;
-      });
-      setQuantities(initialQuantities);
-
-    } catch (error) {
-      console.error("Error fetching event:", error);
-      toast.error("Failed to load event details");
+  useEffect(() => {
+    if (!EVENT_ID) {
+      toast.error("Event ID is not set!");
+      return;
     }
-  };
 
-  fetchEvent();
-}, [EVENT_ID]);
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(
+          `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
+        );
+        const data = res.data?.data;
+
+        if (!data) {
+          toast.error("Event not found");
+          return;
+        }
+
+        setEventDetails(data);
+
+        // save eventMeta immediately
+        setEventMeta({
+          id: data.id,
+          name: data.event_name,
+          dateTime: data.event_datetime,
+          expireOn: data.event_expire_on,
+          venue: data.venue,
+          currency: data.tickets_currency,
+        });
+
+        // filter out deleted tickets
+        const validTickets = (data.tickets || []).filter(
+          (t: any) => !t.is_delete
+        );
+        setTickets(validTickets);
+
+        // initialize ticket quantities
+        const initialQuantities: Record<number, number> = {};
+        validTickets.forEach((t: any) => {
+          initialQuantities[t.id] = t.is_compulsory ? 1 : 0;
+        });
+        setQuantities(initialQuantities);
+      } catch (error) {
+        console.error("Error fetching event:", error);
+        toast.error("Failed to load event details");
+      }
+    };
+
+    fetchEvent();
+  }, [EVENT_ID]);
 
   // Update quantity — pure, no context updates here
   const updateQuantity = (ticketId: number, newQuantity: number) => {
@@ -101,45 +101,45 @@ useEffect(() => {
   }, 0);
 
   const handleGetTickets = async () => {
-  const totalTickets = Object.values(quantities).reduce(
-    (sum, qty) => sum + qty,
-    0
-  );
-
-  // Check compulsory tickets
-  const visibleTickets = tickets.filter((t) => !t.is_delete);
-  const compulsoryTickets = visibleTickets.filter((t) => t.is_compulsory);
-  const missingCompulsory = compulsoryTickets.some(
-    (t) => !(quantities[t.id] > 0)
-  );
-
-  if (totalTickets === 0 || missingCompulsory) {
-    toast.error(
-      missingCompulsory
-        ? "Please select at least one from all compulsory tickets"
-        : "Please select at least one ticket"
+    const totalTickets = Object.values(quantities).reduce(
+      (sum, qty) => sum + qty,
+      0
     );
-    return;
-  }
 
-  // 🔹 This updates context → which triggers localStorage update automatically
-  setSelectedTicketsFromQuantities(tickets, quantities);
+    // Check compulsory tickets
+    const visibleTickets = tickets.filter((t) => !t.is_delete);
+    const compulsoryTickets = visibleTickets.filter((t) => t.is_compulsory);
+    const missingCompulsory = compulsoryTickets.some(
+      (t) => !(quantities[t.id] > 0)
+    );
 
-  setEventMeta({
-    id: eventDetails.id,
-    name: eventDetails.event_name,
-    dateTime: eventDetails.event_datetime,
-    expireOn: eventDetails.event_expire_on,
-    venue: eventDetails.venue,
-    currency: eventDetails.tickets_currency,
-  });
+    if (totalTickets === 0 || missingCompulsory) {
+      toast.error(
+        missingCompulsory
+          ? "Please select at least one from all compulsory tickets"
+          : "Please select at least one ticket"
+      );
+      return;
+    }
 
-  setDynamicFields(eventDetails.fields || []);
+    // 🔹 This updates context → which triggers localStorage update automatically
+    setSelectedTicketsFromQuantities(tickets, quantities);
 
-  setIsLoading(true);
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  router.push("/booking");
-};
+    setEventMeta({
+      id: eventDetails.id,
+      name: eventDetails.event_name,
+      dateTime: eventDetails.event_datetime,
+      expireOn: eventDetails.event_expire_on,
+      venue: eventDetails.venue,
+      currency: eventDetails.tickets_currency,
+    });
+
+    setDynamicFields(eventDetails.fields || []);
+
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    router.push("/booking");
+  };
 
   return (
     <>
@@ -191,7 +191,7 @@ useEffect(() => {
           </motion.div>
 
           <Button
-onClick={handleGetTickets}
+            onClick={handleGetTickets}
             disabled={isLoading}
             className="w-full mt-4 sm:mt-6 text-white rounded-full text-sm sm:text-base py-2 sm:py-3 transition-all duration-200 bg-[#0E5344] hover:bg-[#0E5344]/90"
           >
@@ -244,8 +244,17 @@ onClick={handleGetTickets}
                   <span className="leading-relaxed">{eventDetails.venue}</span>
                 </div>
               </div>
-              <Button className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2">
-                View on map
+              <Button
+                asChild
+                className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
+              >
+                <a
+                  href="https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on map
+                </a>
               </Button>
             </div>
           </div>

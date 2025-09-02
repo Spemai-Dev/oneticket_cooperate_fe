@@ -48,31 +48,40 @@ export function EventDetails() {
       {/* Event Info Section - Mobile Only */}
       <div className="lg:hidden p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
         <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg">
-          Friday, 6 July
+          Friday, 29, September
         </h3>
         <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
           <div className="sm:col-span-2 space-y-2">
             <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
               <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-              <span>6:00pm - 12:00am (6 hours)</span>
+              <span>08:00 AM – 07:00 PM (11 hours)</span>
             </div>
             <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
               <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
               <span className="leading-relaxed">
-                Cottage Medicare Hospital, 18 Iwaya Rd, Yaba 101245, Lagos
+                Monarch Imperial, Colombo, Sri Lanka
               </span>
             </div>
           </div>
-          <Button className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2">
-            View on map
+          <Button
+            asChild
+            className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
+          >
+            <a
+              href="https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on map
+            </a>
           </Button>
         </div>
       </div>
 
       {/* Event Lineup - Mobile Only */}
-      <div className="lg:hidden">
+      {/* <div className="lg:hidden">
         <EventLineup />
-      </div>
+      </div> */}
 
       {/* Agenda Section */}
       <div>
