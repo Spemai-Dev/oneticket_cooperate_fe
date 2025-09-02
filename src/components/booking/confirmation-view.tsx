@@ -83,7 +83,7 @@ export function ConfirmationView({
 
     try {
       const payload = {
-        event_id: "OT4W11909A75BC2F388C5",
+        event_id: "4XTU119096405A4DE629A",
         customer_first_name: personalDetails.firstName,
         customer_last_name: personalDetails.lastName,
         customer_email: personalDetails.email,
