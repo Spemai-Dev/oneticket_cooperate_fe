@@ -42,6 +42,9 @@ ticket, quantity, onQuantityChange
         {ticket.show_remaining_tickets && remaining > 0 && !ticket.is_sold_out && (
           <p className="text-xs text-gray-500">{remaining} tickets left</p>
         )}
+        {ticket.ticket_description && (
+          <p className="text-xs text-gray-600 lg:mt-10 sm:mt-1">{ticket.ticket_description}</p>
+        )}
       </div>
 
       {/* Mobile Layout */}
