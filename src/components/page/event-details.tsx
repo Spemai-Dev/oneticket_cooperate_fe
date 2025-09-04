@@ -6,6 +6,7 @@ import { RefundPolicy } from "./refund-policy";
 import { Sponsors } from "./sponsors";
 import { EventLineup } from "./event-lineup";
 import { AboutEvent } from "./about-event";
+import { TermsAndConditions } from "./terms-conditions";
 
 export function EventDetails() {
   return (
@@ -93,12 +94,14 @@ export function EventDetails() {
       <div className="lg:hidden space-y-4 sm:space-y-6">
         <AboutEvent />
         {/* <Sponsors /> */}
-        <RefundPolicy />
+        <TermsAndConditions />
+        {/* <RefundPolicy /> */}
       </div>
 
       {/* Desktop-only sections (original order) */}
       <div className="hidden lg:block space-y-4 sm:space-y-6 lg:space-y-8 mb-8">
-        <RefundPolicy />
+        <TermsAndConditions />
+        {/* <RefundPolicy /> */}
         {/* <Sponsors /> */}
       </div>
     </div>
