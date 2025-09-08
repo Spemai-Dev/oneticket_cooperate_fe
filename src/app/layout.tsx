@@ -18,10 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "OneTicket | Host & Discover Events in Sri Lanka",
       description:
         "Your go-to platform for event hosting and ticketing. Explore top events, sell tickets, and grow your audience with ease.",
-      url: "https://oneticket.lk",
+      url: "https://aiexpo.oneticket.lk",
       images: [
         {
-          url: "/opengraph-image",
+          url: "https://aiexpo.oneticket.lk/opengraph-image",
           width: 1200,
           height: 630,
           alt: "OneTicket | Sri Lanka's Most Convenient Event Hosting & Ticketing Platform",
@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      images: ["/twitter-image"],
+      images: ["https://aiexpo.oneticket.lk/twitter-image"],
     },
   };
 }
