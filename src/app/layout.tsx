@@ -19,14 +19,18 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Your go-to platform for event hosting and ticketing. Explore top events, sell tickets, and grow your audience with ease.",
       url: "https://oneticket.lk",
-      // images: [
-      //   {
-      //     url: "/images/og-banner.jpg",
-      //     width: 1200,
-      //     height: 630,
-      //     alt: "OneTicket - Events in Sri Lanka",
-      //   },
-      // ],
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "OneTicket | Sri Lanka's Most Convenient Event Hosting & Ticketing Platform",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: ["/twitter-image"],
     },
   };
 }
@@ -43,7 +47,11 @@ export default function RootLayout({
       </head>
       <body className={`bg-[#F6F7F9] antialiased`} suppressHydrationWarning>
         <Head>
-          <meta key="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+          <meta
+            key="viewport"
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+          />
         </Head>
         <SmoothScroller />
         <Navigation />
