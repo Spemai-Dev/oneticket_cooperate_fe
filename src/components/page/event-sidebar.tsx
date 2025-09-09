@@ -98,50 +98,59 @@ export function EventSidebar() {
       toast.error("Event ID is not set!");
       return;
     }
-
-    const fetchEvent = async () => {
+    const fetchEventData = async () => {
       try {
-        const res = await axios.get(
+        // Fetch event details
+        const resEvent = await axios.get(
           `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
         );
-        const data = res.data?.data;
+        const eventData = resEvent.data?.data;
+        if (!eventData) throw new Error("Event details not found");
+        setEventDetails(eventData);
 
-        if (!data) {
-          toast.error("Event not found");
-          return;
-        }
-
-        setEventDetails(data);
-
-        // save eventMeta immediately
+        // Set event meta for context
         setEventMeta({
-          id: data.id,
-          name: data.event_name,
-          dateTime: data.event_datetime,
-          expireOn: data.event_expire_on,
-          venue: data.venue,
-          currency: data.tickets_currency,
+          id: eventData.id,
+          name: eventData.event_name,
+          dateTime: eventData.event_datetime,
+          expireOn: eventData.event_expire_on,
+          venue: eventData.venue,
+          currency: eventData.tickets_currency,
         });
 
-        // filter out deleted tickets
-        const validTickets = (data.tickets || []).filter(
-          (t: any) => !t.is_delete
+        // Set dynamic fields
+        setDynamicFields(eventData.fields || []);
+
+        // Fetch tickets
+        const resTickets = await axios.get(
+          `https://oneticket.onepay.lk/api/v3/oneticket/user/event/tickets-by-slot/`,
+          {
+            params: {
+              event_id: EVENT_ID,
+              venue: "Colombo",
+              day: "2025-09-29",
+              start_time: "08:00",
+            },
+          }
         );
+
+        const ticketsData = resTickets.data?.data || [];
+        const validTickets = ticketsData.filter((t: any) => !t.is_delete);
         setTickets(validTickets);
 
-        // initialize ticket quantities
+        // Initialize ticket quantities
         const initialQuantities: Record<number, number> = {};
         validTickets.forEach((t: any) => {
           initialQuantities[t.id] = t.is_compulsory ? 1 : 0;
         });
         setQuantities(initialQuantities);
       } catch (error) {
-        console.error("Error fetching event:", error);
-        toast.error("Failed to load event details");
+        console.error(error);
+        toast.error("Failed to load event or tickets");
       }
     };
 
-    fetchEvent();
+    fetchEventData();
   }, [EVENT_ID]);
 
   // Update quantity — pure, no context updates here
@@ -192,14 +201,14 @@ export function EventSidebar() {
     // 🔹 This updates context → which triggers localStorage update automatically
     setSelectedTicketsFromQuantities(tickets, quantities);
 
-    setEventMeta({
-      id: eventDetails.id,
-      name: eventDetails.event_name,
-      dateTime: eventDetails.event_datetime,
-      expireOn: eventDetails.event_expire_on,
-      venue: eventDetails.venue,
-      currency: eventDetails.tickets_currency,
-    });
+    // setEventMeta({
+    //   id: eventDetails.id,
+    //   name: eventDetails.event_name,
+    //   dateTime: eventDetails.event_datetime,
+    //   expireOn: eventDetails.event_expire_on,
+    //   venue: eventDetails.venue,
+    //   currency: eventDetails.tickets_currency,
+    // });
 
     setDynamicFields(eventDetails.fields || []);
 
