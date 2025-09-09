@@ -6,7 +6,7 @@ env_variables:
   NODE_ENV: 'production'
 
 handlers:
-  # Serve Next build assets
+  # Serve Next build assetsss
   - url: /_next/static
     static_dir: .next/static
     http_headers:
