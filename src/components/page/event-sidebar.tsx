@@ -7,6 +7,7 @@ import { Loader2, Clock, MapPin } from "lucide-react";
 import { TicketTier } from "./ticket-tier";
 import { EventLineup } from "./event-lineup";
 import { AboutEvent } from "./about-event";
+import { ScheduleSelector } from "./schedule-selector";
 import { motion } from "framer-motion";
 import { MobileBookingBar } from "@/components/mobile/mobile-booking-bar";
 import { toast } from "sonner";
@@ -20,11 +21,77 @@ export function EventSidebar() {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [tickets, setTickets] = useState<any[]>([]);
   const [eventDetails, setEventDetails] = useState<any>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<{
+    location?: string;
+    date?: string;
+    time?: string;
+  }>({});
 
   const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } =
     useBooking();
 
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || 'OT4W11909A75BC2F388C5';
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "OT4W11909A75BC2F388C5";
+
+  // Venue and time mapping based on location
+  const locationData = {
+    Colombo: {
+      venue: "Monarch Imperial, Colombo, Sri Lanka",
+      mapUrl: "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8",
+      times: {
+        "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+        "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+        "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+        "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+      },
+    },
+    Kandy: {
+      venue: "Earl's Regency Hotel, Kandy, Sri Lanka",
+      mapUrl: "https://maps.app.goo.gl/kandy-venue",
+      times: {
+        "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+        "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+        "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+        "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+      },
+    },
+    Galle: {
+      venue: "Jetwing Lighthouse, Galle, Sri Lanka",
+      mapUrl: "https://maps.app.goo.gl/galle-venue",
+      times: {
+        "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+        "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+        "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+        "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+      },
+    },
+  };
+
+  // Helper function to get current venue and time
+  const getCurrentVenue = () => {
+    const location = selectedSchedule.location || "Colombo";
+    return (
+      locationData[location as keyof typeof locationData]?.venue ||
+      "Monarch Imperial, Colombo, Sri Lanka"
+    );
+  };
+
+  const getCurrentTime = () => {
+    const location = selectedSchedule.location || "Colombo";
+    const time = selectedSchedule.time || "08:00 AM";
+    const locationInfo = locationData[location as keyof typeof locationData];
+    if (locationInfo && time in locationInfo.times) {
+      return locationInfo.times[time as keyof typeof locationInfo.times];
+    }
+    return "08:00 AM – 07:00 PM (GMT +5:30)";
+  };
+
+  const getCurrentMapUrl = () => {
+    const location = selectedSchedule.location || "Colombo";
+    return (
+      locationData[location as keyof typeof locationData]?.mapUrl ||
+      "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+    );
+  };
 
   useEffect(() => {
     if (!EVENT_ID) {
@@ -144,6 +211,79 @@ export function EventSidebar() {
   return (
     <>
       <div className="w-full lg:col-span-1 space-y-4">
+        {/* Schedule Selector */}
+        <div className="hidden lg:block">
+          <ScheduleSelector
+            title="Select the location, date, and time you prefer"
+            locations={["Colombo", "Kandy", "Galle"]}
+            dates={["Fri, 29 Sep", "Sat, 30 Sep"]}
+            times={["08:00 AM", "10:00 AM", "02:00 PM", "04:00 PM"]}
+            onChange={(selection) => {
+              console.log("Schedule selection:", selection);
+              setSelectedSchedule(selection);
+            }}
+          />
+        </div>
+
+        {/* Event Info */}
+        {eventDetails && (
+          <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
+            <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
+              {/* {new Date(eventDetails.event_datetime).toLocaleDateString(
+                "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }
+              )} */}
+              {"29th and 30th September 2025"}
+            </h3>
+            <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
+              <div className="sm:col-span-2 space-y-2">
+                <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+                  {/* <span>
+                    {new Date(eventDetails.event_datetime).toLocaleTimeString(
+                      [],
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}{" "}
+                    -{" "}
+                    {new Date(eventDetails.event_expire_on).toLocaleTimeString(
+                      [],
+                      { hour: "2-digit", minute: "2-digit" }
+                    )}
+                  </span> */}
+                  <span>{getCurrentTime()}</span>
+                </div>
+                <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
+                  <span className="leading-relaxed">
+                    {/* {eventDetails.venue} */}
+                    {getCurrentVenue()}
+                  </span>
+                </div>
+              </div>
+              <Button
+                asChild
+                className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
+              >
+                <a
+                  href={getCurrentMapUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on map
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
           {tickets.length === 0 ? (
             <p className="text-sm text-gray-500">Loading tickets...</p>
@@ -205,65 +345,6 @@ export function EventSidebar() {
             )}
           </Button>
         </div>
-
-        {/* Event Info */}
-        {eventDetails && (
-          <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
-            <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
-              {/* {new Date(eventDetails.event_datetime).toLocaleDateString(
-                "en-US",
-                {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                }
-              )} */}
-              29th and 30th September 2025
-            </h3>
-            <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
-              <div className="sm:col-span-2 space-y-2">
-                <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                  {/* <span>
-                    {new Date(eventDetails.event_datetime).toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}{" "}
-                    -{" "}
-                    {new Date(eventDetails.event_expire_on).toLocaleTimeString(
-                      [],
-                      { hour: "2-digit", minute: "2-digit" }
-                    )}
-                  </span> */}
-                  <span>08:00 AM – 07:00 PM (11 hours)</span>
-                </div>
-                <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="leading-relaxed">
-                    {/* {eventDetails.venue} */}
-                    Monarch Imperial, Colombo, Sri Lanka
-                    </span>
-                </div>
-              </div>
-              <Button
-                asChild
-                className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
-              >
-                <a
-                  href="https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View on map
-                </a>
-              </Button>
-            </div>
-          </div>
-        )}
 
         {/* <div className="pt-4 hidden lg:block">
           <EventLineup />
