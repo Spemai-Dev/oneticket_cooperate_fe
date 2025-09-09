@@ -4,23 +4,20 @@ export function AboutEvent() {
       <h3 className="text-xl font-bold mb-4">About this event</h3>
       <div className="space-y-4 text-sm text-muted-foreground">
         <p>
-          The AI National Expo is the premier destination for artificial
-          intelligence innovation, bringing together the brightest minds in
-          technology, research, and industry to explore the transformative power
-          of AI.
+          The Sri Lanka Retailers’ Association (SLRA) proudly presents Retail
+          Forum 2025, the nation’s flagship retail conference.
         </p>
         <p>
-          Our mission is to accelerate AI adoption across industries by
-          fostering collaboration between researchers, entrepreneurs, and
-          enterprise leaders. The National AI Expo and Conference will showcase
-          cutting-edge solutions that are reshaping how we work, live, and
-          interact with technology.
+          Retail is one of Sri Lanka’s most vital industries, contributing 14%
+          of GDP and employing over 14% of the workforce. This year’s theme,
+          “Retail Reimagined – Where AI Meets the Human Edge”, explores how
+          artificial intelligence, automation, and human creativity are
+          reshaping customer experience, operations, and retail business models.
         </p>
         <p>
-          Join us for an immersive experience featuring groundbreaking
-          demonstrations, thought-provoking discussions, and unparalleled
-          networking opportunities that will define the future of artificial
-          intelligence.
+          Expect a full day of inspiring keynotes, expert panels, innovation
+          showcases, and networking with 350+ leaders from retail, technology,
+          fintech, startups, and government.
         </p>
         
       </div>

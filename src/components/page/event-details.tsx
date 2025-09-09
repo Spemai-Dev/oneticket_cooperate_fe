@@ -14,7 +14,7 @@ export function EventDetails() {
   return (
     <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
       <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 leading-tight">
-        National AI Exhibition & Conference 2025
+        Retail Forum 2025 – Retail Reimagined: Where AI Meets the Human Edge
       </h1>
 
       {/* Date/Time Section */}
@@ -35,16 +35,18 @@ export function EventDetails() {
           </div> */}
           <div className="mt-5">
             <p className="font-semibold">
-              Pioneered by the Ministry of Digital Economy and SLT-MOBITEL
+              Organized by Sri Lanka Retailers’ Association (SLRA)
             </p>
             <p className="text-sm text-muted-foreground">Sri Lanka</p>
           </div>
         </div>
         <p className="text-muted-foreground">
-          Sri Lanka’s first ever National AI Exhibition and Conference. Witness
-          the power of AI in Technology, Education, Healthcare, Manufacturing
-          and many more. Meet industry experts, engage in panel discussions, and
-          hear from experts talking on AI, Digital Economy.
+          The Sri Lanka Retailers’ Association (SLRA) is the apex body
+          representing the organized retail sector in Sri Lanka. Since our
+          establishment in 2015, we’ve brought together retailers from nine key
+          industries to build a collaborative, future-ready retail ecosystem.
+          From FMCG to fashion, digital retail to healthcare, SLRA reflects the
+          full diversity and strength of Sri Lanka’s retail economy.
         </p>
       </div>
 

@@ -30,7 +30,7 @@ export function EventSidebar() {
   const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } =
     useBooking();
 
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "OT4W11909A75BC2F388C5";
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "MLUX11909AE901792DBB5";
 
   // // Venue and time mapping based on location
   // const locationData = {
@@ -128,8 +128,8 @@ export function EventSidebar() {
             params: {
               event_id: EVENT_ID,
               venue: "Colombo",
-              day: "2025-09-29",
-              start_time: "08:00",
+              day: "2025-10-23",
+              start_time: "09:00",
             },
           }
         );
@@ -310,7 +310,7 @@ export function EventSidebar() {
                   day: "numeric",
                 }
               )} */}
-              29th and 30th September 2025
+              23rd October 2025
             </h3>
             <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
               <div className="sm:col-span-2 space-y-2">
@@ -330,13 +330,13 @@ export function EventSidebar() {
                       { hour: "2-digit", minute: "2-digit" }
                     )}
                   </span> */}
-                  <span>08:00 AM – 07:00 PM (11 hours)</span>
+                  <span>9:00 AM – 5:00 PM (8 hours)</span>
                 </div>
                 <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="leading-relaxed">
                     {/* {eventDetails.venue} */}
-                    Monarch Imperial, Colombo, Sri Lanka
+                    Shangri-La Hotel, Colombo
                     </span>
                 </div>
               </div>
@@ -345,7 +345,7 @@ export function EventSidebar() {
                 className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
               >
                 <a
-                  href="https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+                  href="https://maps.app.goo.gl/yZgCazrT7pu2dWX17"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
