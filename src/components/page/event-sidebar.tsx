@@ -234,64 +234,6 @@ export function EventSidebar() {
           />
         </div> */}
 
-        {/* Event Info */}
-        {eventDetails && (
-          <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
-            <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
-              {/* {new Date(eventDetails.event_datetime).toLocaleDateString(
-                "en-US",
-                {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                }
-              )} */}
-              {"29th and 30th September 2025"}
-            </h3>
-            <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
-              <div className="sm:col-span-2 space-y-2">
-                <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                  {/* <span>
-                    {new Date(eventDetails.event_datetime).toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}{" "}
-                    -{" "}
-                    {new Date(eventDetails.event_expire_on).toLocaleTimeString(
-                      [],
-                      { hour: "2-digit", minute: "2-digit" }
-                    )}
-                  </span> */}
-                  <span>{getCurrentTime()}</span>
-                </div>
-                <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="leading-relaxed">
-                    {/* {eventDetails.venue} */}
-                    {getCurrentVenue()}
-                  </span>
-                </div>
-              </div>
-              <Button
-                asChild
-                className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
-              >
-                <a
-                  href={getCurrentMapUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View on map
-                </a>
-              </Button>
-            </div>
-          </div>
-        )}
 
         <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
           {tickets.length === 0 ? (
