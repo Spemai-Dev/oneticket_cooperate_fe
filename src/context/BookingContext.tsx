@@ -31,6 +31,7 @@ export interface EventMeta {
   id: number;
   name: string;
   dateTime: string;
+  endTime: string;
   expireOn: string;
   venue: string;
   currency: string;
@@ -94,9 +95,13 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   /** SSR-safe states */
   const [eventMeta, setEventMetaState] = useState<EventMeta | null>(null);
   const [dynamicFields, setDynamicFields] = useState<Field[]>([]);
-  const [selectedTickets, setSelectedTicketsState] = useState<SelectedTicket[]>([]);
-  const [personalDetails, setPersonalDetailsState] = useState<PersonalDetails | null>(null);
-  const [additionalDetails, setAdditionalDetailsState] = useState<AdditionalDetails>({});
+  const [selectedTickets, setSelectedTicketsState] = useState<SelectedTicket[]>(
+    []
+  );
+  const [personalDetails, setPersonalDetailsState] =
+    useState<PersonalDetails | null>(null);
+  const [additionalDetails, setAdditionalDetailsState] =
+    useState<AdditionalDetails>({});
 
   /** Load saved state from localStorage (client only) */
   useEffect(() => {
@@ -129,38 +134,40 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const isTruthy = (v: any) => !!v;
 
   /** Build selected tickets from API tickets + quantities */
-const setSelectedTicketsFromQuantities = (
-  sourceTickets: ApiTicket[],
-  quantities: Record<number, number>
-) => {
-  // Build selected tickets synchronously
-  const items: SelectedTicket[] = sourceTickets
-    .filter((t) => !t.is_delete) // skip deleted
-    .map((t) => {
-      const qty = t.is_compulsory ? Math.max(1, quantities[t.id] || 0) : Math.max(0, quantities[t.id] || 0);
-      const isFree = !!t.is_free_ticket;
-      const unitPrice = isFree ? 0 : parseFloat(t.ticket_amount || "0");
+  const setSelectedTicketsFromQuantities = (
+    sourceTickets: ApiTicket[],
+    quantities: Record<number, number>
+  ) => {
+    // Build selected tickets synchronously
+    const items: SelectedTicket[] = sourceTickets
+      .filter((t) => !t.is_delete) // skip deleted
+      .map((t) => {
+        const qty = t.is_compulsory
+          ? Math.max(1, quantities[t.id] || 0)
+          : Math.max(0, quantities[t.id] || 0);
+        const isFree = !!t.is_free_ticket;
+        const unitPrice = isFree ? 0 : parseFloat(t.ticket_amount || "0");
 
-      return {
-        id: t.id,
-        name: t.ticket_name || `Ticket #${t.id}`,
-        quantity: qty,
-        unitPrice,
-        isFree,
-        subtotal: qty * unitPrice,
-        description: t.ticket_description,
-      };
-    })
-    .filter((t) => t.quantity > 0);
+        return {
+          id: t.id,
+          name: t.ticket_name || `Ticket #${t.id}`,
+          quantity: qty,
+          unitPrice,
+          isFree,
+          subtotal: qty * unitPrice,
+          description: t.ticket_description,
+        };
+      })
+      .filter((t) => t.quantity > 0);
 
-  // 🔹 Update state
-  setSelectedTicketsState(items);
+    // 🔹 Update state
+    setSelectedTicketsState(items);
 
-  // 🔹 Save **immediately** to localStorage
-  if (typeof window !== "undefined") {
-    localStorage.setItem("selectedTickets", JSON.stringify(items));
-  }
-};
+    // 🔹 Save **immediately** to localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("selectedTickets", JSON.stringify(items));
+    }
+  };
 
   /** Totals */
   const totalQuantity = useMemo(
@@ -233,12 +240,15 @@ const setSelectedTicketsFromQuantities = (
     resetAll,
   };
 
-  return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;
+  return (
+    <BookingContext.Provider value={value}>{children}</BookingContext.Provider>
+  );
 }
 
 /** Hook */
 export function useBooking() {
   const ctx = useContext(BookingContext);
-  if (!ctx) throw new Error("useBooking must be used within <BookingProvider />");
+  if (!ctx)
+    throw new Error("useBooking must be used within <BookingProvider />");
   return ctx;
 }

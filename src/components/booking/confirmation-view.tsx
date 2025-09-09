@@ -11,11 +11,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, Mail, Loader2, Sparkles, Home, AlertCircle } from "lucide-react";
+import {
+  Check,
+  Mail,
+  Loader2,
+  Sparkles,
+  Home,
+  AlertCircle,
+} from "lucide-react";
 import { useBooking } from "@/context/BookingContext";
 import axios from "axios";
 import { environment } from "@/config/data";
-import { OnePaySDK } from '@onepaynpm/onepay-sdk';
+import { OnePaySDK } from "@onepaynpm/onepay-sdk";
 
 interface ConfirmationViewProps {
   data: any;
@@ -45,28 +52,28 @@ export function ConfirmationView({
 
   // Initialize OnePay SDK
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const onePaySDK = new OnePaySDK();
-      
+
       onePaySDK.addEventListener({
         onSuccess: (result) => {
-          console.log('Payment successful:', result);
+          console.log("Payment successful:", result);
           setIsLoading(false);
           setShowThankYouDialog(true);
           // You can redirect to ticket assignment page here
           // router.push(`/tickets/${result.orderId}/${result.token}`);
         },
         onFail: (result) => {
-          console.log('Payment failed:', result);
+          console.log("Payment failed:", result);
           setIsLoading(false);
           setErrorMessage("Payment failed. Please try again.");
           setShowErrorDialog(true);
         },
         onClose: (result) => {
-          console.log('Payment modal closed:', result);
+          console.log("Payment modal closed:", result);
           setIsLoading(false);
           // Handle modal close - user might want to try again
-        }
+        },
       });
     }
   }, []);
@@ -110,8 +117,8 @@ export function ConfirmationView({
 
       if (response.data?.data?.payment_url) {
         const paymentUrl = response.data.data.payment_url;
-        const transactionId = response.data.data.onepay_transaction_id ;
-        
+        const transactionId = response.data.data.onepay_transaction_id;
+
         setPaymentUrl(paymentUrl);
         setTransactionId(transactionId);
 
@@ -119,7 +126,7 @@ export function ConfirmationView({
         const onePaySDK = new OnePaySDK();
         await onePaySDK.processDirectPayment({
           directGatewayURL: paymentUrl,
-          directTransactionId: transactionId
+          directTransactionId: transactionId,
         });
       } else {
         throw new Error("Payment URL not found in response");
@@ -127,7 +134,10 @@ export function ConfirmationView({
     } catch (error: any) {
       console.error(error);
       setIsLoading(false);
-      setErrorMessage(error.response?.data?.message || "Failed to create transaction. Please try again.");
+      setErrorMessage(
+        error.response?.data?.message ||
+          "Failed to create transaction. Please try again."
+      );
       setShowErrorDialog(true);
     }
   };
@@ -189,7 +199,7 @@ export function ConfirmationView({
 
       {/* Additional Info Section */}
       {additionalDetails && Object.keys(additionalDetails).length > 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -237,13 +247,31 @@ export function ConfirmationView({
                   {eventMeta.name}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {new Date(eventMeta.dateTime).toLocaleDateString()} •{" "}
-                  {new Date(eventMeta.dateTime).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {eventMeta?.dateTime
+                    ? new Date(eventMeta.dateTime).toLocaleDateString()
+                    : "Event Date"}{" "}
+                  •{" "}
+                  {eventMeta?.dateTime && eventMeta?.endTime
+                    ? `${new Date(eventMeta.dateTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })} - ${new Date(eventMeta.endTime).toLocaleTimeString(
+                        [],
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}`
+                    : eventMeta?.dateTime
+                    ? new Date(eventMeta.dateTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "Event Time"}
                 </p>
-                <p className="text-sm text-gray-600">{eventMeta.venue}</p>
+                <p className="text-sm text-gray-600">
+                  {eventMeta?.venue || "Event Venue"}
+                </p>
               </div>
 
               <div className="border-t pt-4 space-y-3">
@@ -320,7 +348,15 @@ export function ConfirmationView({
       </motion.div>
 
       {/* Thank You Dialog */}
-      <Dialog open={showThankYouDialog} onOpenChange={setShowThankYouDialog}>
+      <Dialog
+        open={showThankYouDialog}
+        onOpenChange={(open) => {
+          setShowThankYouDialog(open);
+          if (!open) {
+            router.push("/");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-lg border-0 bg-white">
           <div className="relative overflow-hidden">
             {/* Animated Background Elements */}
@@ -364,7 +400,7 @@ export function ConfirmationView({
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
                   >
-                  Payment Successful!
+                    Payment Successful!
                   </motion.span>
                   <motion.span
                     initial={{ scale: 0 }}
@@ -389,7 +425,7 @@ export function ConfirmationView({
                   transition={{ delay: 0.7 }}
                   className="text-lg font-semibold text-gray-900"
                 >
-                Your payment has been processed successfully!
+                  Your payment has been processed successfully!
                 </motion.p>
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -397,8 +433,8 @@ export function ConfirmationView({
                   transition={{ delay: 0.8 }}
                   className="text-sm text-gray-600 leading-relaxed px-4"
                 >
-                Check your email for ticket details and instructions on how to
-                collect your tickets and allocate them to persons.
+                  Check your email for ticket details and instructions on how to
+                  collect your tickets and allocate them to persons.
                 </motion.p>
               </div>
 
@@ -437,12 +473,12 @@ export function ConfirmationView({
                 transition={{ delay: 1 }}
                 className="pt-4"
               >
-              <Button
-                onClick={() => router.push("/")}
-                className="bg-[#0E5344] hover:bg-[#0E5344]/90 text-white rounded-full px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                Back to Event Page
-              </Button>
+                <Button
+                  onClick={() => router.push("/")}
+                  className="bg-[#0E5344] hover:bg-[#0E5344]/90 text-white rounded-full px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Back to Event Page
+                </Button>
               </motion.div>
             </motion.div>
           </div>
@@ -450,7 +486,15 @@ export function ConfirmationView({
       </Dialog>
 
       {/* Error Dialog */}
-      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+      <Dialog
+        open={showErrorDialog}
+        onOpenChange={(open) => {
+          setShowErrorDialog(open);
+          if (!open) {
+            router.push("/");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-lg border-0 bg-white">
           <div className="relative overflow-hidden">
             <DialogHeader className="relative z-10">
@@ -512,10 +556,10 @@ export function ConfirmationView({
                 className="pt-4"
               >
                 <Button
-                  onClick={() => setShowErrorDialog(false)}
+                  onClick={() => router.push("/")}
                   className="bg-red-600 hover:bg-red-700 text-white rounded-full px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  Try Again
+                  Back to Event Page
                 </Button>
               </motion.div>
             </motion.div>

@@ -109,12 +109,29 @@ export function EventSidebar() {
         setEventDetails(eventData);
 
         // Set event meta for context
+        const primaryVenue = eventData.venues?.[0];
+        const primaryDay = primaryVenue?.days?.[0];
+        const primaryTime = primaryDay?.times?.[0];
+
+        // Create proper datetime string combining date and start time
+        const eventDateTime =
+          primaryDay?.day && primaryTime?.start_time
+            ? `${primaryDay.day}T${primaryTime.start_time}:00`
+            : eventData.event_datetime;
+
+        // Create end time string
+        const eventEndTime =
+          primaryDay?.day && primaryTime?.end_time
+            ? `${primaryDay.day}T${primaryTime.end_time}:00`
+            : eventData.event_expire_on;
+
         setEventMeta({
           id: eventData.id,
           name: eventData.event_name,
-          dateTime: eventData.event_datetime,
+          dateTime: eventDateTime,
+          endTime: eventEndTime,
           expireOn: eventData.event_expire_on,
-          venue: eventData.venue,
+          venue: primaryVenue?.venue_address || eventData.venue,
           currency: eventData.tickets_currency,
         });
 
@@ -234,7 +251,6 @@ export function EventSidebar() {
           />
         </div> */}
 
-
         <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
           {tickets.length === 0 ? (
             <p className="text-sm text-gray-500">Loading tickets...</p>
@@ -297,7 +313,7 @@ export function EventSidebar() {
           </Button>
         </div>
 
-{/* Event Info */}
+        {/* Event Info */}
         {eventDetails && (
           <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
             <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
@@ -337,7 +353,7 @@ export function EventSidebar() {
                   <span className="leading-relaxed">
                     {/* {eventDetails.venue} */}
                     Shangri-La Hotel, Colombo
-                    </span>
+                  </span>
                 </div>
               </div>
               <Button

@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TicketTier } from "@/components/page/ticket-tier";
 import { ScheduleSelector } from "@/components/page/schedule-selector";
+import axios from "axios";
+import { environment } from "@/config/data";
 
 interface Ticket {
   id: number;
@@ -47,6 +49,31 @@ export function MobileBookingBar({
     date?: string;
     time?: string;
   }>({});
+  const [eventDetails, setEventDetails] = useState<any>(null);
+
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "MLUX11909AE901792DBB5";
+
+  useEffect(() => {
+    if (!EVENT_ID) {
+      toast.error("Event ID is not set!");
+      return;
+    }
+    const fetchEventData = async () => {
+      try {
+        const resEvent = await axios.get(
+          `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
+        );
+        const eventData = resEvent.data?.data;
+        if (!eventData) throw new Error("Event details not found");
+        setEventDetails(eventData);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load event details");
+      }
+    };
+
+    fetchEventData();
+  }, [EVENT_ID]);
 
   // Venue and time mapping based on location
   const locationData = {
@@ -84,6 +111,7 @@ export function MobileBookingBar({
 
   // Helper function to get current venue and time
   const getCurrentVenue = () => {
+    if (eventDetails?.venue) return eventDetails.venue;
     const location = selectedSchedule.location || "Colombo";
     return (
       locationData[location as keyof typeof locationData]?.venue ||
@@ -92,6 +120,22 @@ export function MobileBookingBar({
   };
 
   const getCurrentTime = () => {
+    if (eventDetails?.event_datetime && eventDetails?.event_expire_on) {
+      try {
+        const start = new Date(eventDetails.event_datetime);
+        const end = new Date(eventDetails.event_expire_on);
+        const formatter: Intl.DateTimeFormatOptions = {
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        return `${start.toLocaleTimeString(
+          [],
+          formatter
+        )} - ${end.toLocaleTimeString([], formatter)}`;
+      } catch {
+        // fall through to default below
+      }
+    }
     const location = selectedSchedule.location || "Colombo";
     const time = selectedSchedule.time || "08:00 AM";
     const locationInfo = locationData[location as keyof typeof locationData];
@@ -102,12 +146,56 @@ export function MobileBookingBar({
   };
 
   const getCurrentMapUrl = () => {
+    if (eventDetails?.map_url) return eventDetails.map_url;
     const location = selectedSchedule.location || "Colombo";
     return (
       locationData[location as keyof typeof locationData]?.mapUrl ||
       "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
     );
   };
+
+  const primaryVenue = eventDetails?.venues?.[0];
+  const primaryDay = primaryVenue?.days?.[0];
+  const primaryTime = primaryDay?.times?.[0];
+
+  const formattedMobileDate = primaryDay?.day
+    ? new Date(primaryDay.day).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : eventDetails?.event_datetime
+    ? new Date(eventDetails.event_datetime).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
+
+  const formattedMobileTime =
+    primaryTime?.start_time && primaryTime?.end_time
+      ? `${new Date(
+          `1970-01-01T${primaryTime.start_time}:00`
+        ).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })} - ${new Date(
+          `1970-01-01T${primaryTime.end_time}:00`
+        ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+      : eventDetails?.event_datetime && eventDetails?.event_expire_on
+      ? `${new Date(eventDetails.event_datetime).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })} - ${new Date(eventDetails.event_expire_on).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`
+      : "";
+
+  const mobileVenueAddress =
+    primaryVenue?.venue_address || eventDetails?.venue || "";
 
   // Cleanup on unmount to prevent message port errors
   useEffect(() => {
@@ -268,17 +356,17 @@ export function MobileBookingBar({
               <div className="px-4 py-2">
                 <div className="p-4 rounded-3xl border border-gray-200 bg-white">
                   <h3 className="font-bold mb-3 text-base">
-                    {"29th and 30th September 2025"}
+                    {formattedMobileDate}
                   </h3>
                   <div className="space-y-2">
                     <div className="flex items-center text-xs text-muted-foreground">
                       <Clock className="w-3 h-3 mr-2 flex-shrink-0" />
-                      <span>{getCurrentTime()}</span>
+                      <span>{formattedMobileTime}</span>
                     </div>
                     <div className="flex items-start text-xs text-muted-foreground">
                       <MapPin className="w-3 h-3 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="leading-relaxed">
-                        {getCurrentVenue()}
+                        {mobileVenueAddress}
                       </span>
                     </div>
                     <Button
@@ -286,7 +374,11 @@ export function MobileBookingBar({
                       className="w-full mt-3 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs py-2"
                     >
                       <a
-                        href={getCurrentMapUrl()}
+                        href={
+                          eventDetails?.map_url ||
+                          eventDetails?.google_map_url ||
+                          "https://maps.app.goo.gl/m21Gbn1A1FQBSQ1S7"
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                       >

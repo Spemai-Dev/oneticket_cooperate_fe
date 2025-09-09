@@ -6,6 +6,7 @@ import { Stepper } from "@/components/ui/stepper";
 import { BasicDetailsForm } from "@/components/booking/basic-details-form";
 import { AdditionalDetailsForm } from "@/components/booking/additional-details-form";
 import { ConfirmationView } from "@/components/booking/confirmation-view";
+import { useBooking } from "@/context/BookingContext";
 import axios from "axios";
 import { environment } from "@/config/data";
 
@@ -39,6 +40,7 @@ export default function BookingPage() {
   const [bookingData, setBookingData] =
     useState<BookingData>(initialBookingData);
   const [fields, setFields] = useState<Field[]>([]);
+  const { setEventMeta, setDynamicFields } = useBooking();
   const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "MLUX11909AE901792DBB5";
 
   // Fetch dynamic fields from API
@@ -48,7 +50,38 @@ export default function BookingPage() {
         const res = await axios.get(
           `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
         );
-        const apiFields: Field[] = res.data?.data?.fields || [];
+        const eventData = res.data?.data;
+        const apiFields: Field[] = eventData?.fields || [];
+
+        // Set event meta
+        const primaryVenue = eventData?.venues?.[0];
+        const primaryDay = primaryVenue?.days?.[0];
+        const primaryTime = primaryDay?.times?.[0];
+
+        // Create proper datetime string combining date and start time
+        const eventDateTime =
+          primaryDay?.day && primaryTime?.start_time
+            ? `${primaryDay.day}T${primaryTime.start_time}:00`
+            : eventData?.event_datetime;
+
+        // Create end time string
+        const eventEndTime =
+          primaryDay?.day && primaryTime?.end_time
+            ? `${primaryDay.day}T${primaryTime.end_time}:00`
+            : eventData?.event_expire_on;
+
+        setEventMeta({
+          id: eventData?.id,
+          name: eventData?.event_name,
+          dateTime: eventDateTime,
+          endTime: eventEndTime,
+          expireOn: eventData?.event_expire_on,
+          venue: primaryVenue?.venue_address || eventData?.venue,
+          currency: eventData?.tickets_currency,
+        });
+
+        // Set dynamic fields
+        setDynamicFields(apiFields);
 
         // Initialize bookingData with dynamic fields
         const dynamicFieldsData: Record<string, string> = {};
@@ -68,7 +101,7 @@ export default function BookingPage() {
     };
 
     fetchFields();
-  }, [EVENT_ID]);
+  }, [EVENT_ID, setEventMeta, setDynamicFields]);
 
   const steps = ["Personal Details", "Additional Info", "Confirmation"];
 
