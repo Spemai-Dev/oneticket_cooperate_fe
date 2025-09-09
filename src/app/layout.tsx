@@ -8,28 +8,24 @@ import "@/lib/suppress-warnings";
 import "./globals.css";
 import { BookingProvider } from "@/context/BookingContext";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title:
-      "OneTicket | Sri Lanka's Most Convenient Event Hosting & Ticketing Platform",
+export const metadata: Metadata = {
+  title:
+    "OneTicket | Sri Lanka's Most Convenient Event Hosting & Ticketing Platform",
+  description:
+    "Discover and host the best events in Sri Lanka with OneTicket. From concerts and festivals to sports and conferences — buy, sell, and manage tickets effortlessly.",
+  metadataBase: new URL("https://aiexpo.oneticket.lk"),
+  openGraph: {
+    type: "website",
+    title: "OneTicket | Host & Discover Events in Sri Lanka",
     description:
-      "Discover and host the best events in Sri Lanka with OneTicket. From concerts and festivals to sports and conferences — buy, sell, and manage tickets effortlessly.",
-    openGraph: {
-      title: "OneTicket | Host & Discover Events in Sri Lanka",
-      description:
-        "Your go-to platform for event hosting and ticketing. Explore top events, sell tickets, and grow your audience with ease.",
-      url: "https://oneticket.lk",
-      // images: [
-      //   {
-      //     url: "/images/og-banner.jpg",
-      //     width: 1200,
-      //     height: 630,
-      //     alt: "OneTicket - Events in Sri Lanka",
-      //   },
-      // ],
-    },
-  };
-}
+      "Your go-to platform for event hosting and ticketing. Explore top events, sell tickets, and grow your audience with ease.",
+    url: "https://aiexpo.oneticket.lk",
+    siteName: "OneTicket",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -43,7 +39,11 @@ export default function RootLayout({
       </head>
       <body className={`bg-[#F6F7F9] antialiased`} suppressHydrationWarning>
         <Head>
-          <meta key="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+          <meta
+            key="viewport"
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+          />
         </Head>
         <SmoothScroller />
         <Navigation />

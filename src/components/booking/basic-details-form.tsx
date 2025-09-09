@@ -10,6 +10,13 @@ import { BookingData } from "@/app/booking/page";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useBooking } from "@/context/BookingContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface BasicDetailsFormProps {
   data: BookingData;
@@ -25,6 +32,7 @@ export function BasicDetailsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const { setPersonalDetails } = useBooking();
+  const dialCode = "+94";
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -58,13 +66,14 @@ export function BasicDetailsForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-    setPersonalDetails({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      contactNumber: data.contactNumber,
-      idNumber: data.idNumber,
-    });
+      const fullContactNumber = `${dialCode}${data.contactNumber}`;
+      setPersonalDetails({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        contactNumber: fullContactNumber,
+        idNumber: data.idNumber,
+      });
       setIsLoading(true);
       // Simulate validation delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -81,13 +90,15 @@ export function BasicDetailsForm({
     }
   };
 
+  // Country code selector removed; using static dialCode
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="border-0 shadow-none bg-transparent">
+      <Card className="border-0 shadow-none bg-transparent overflow-visible">
         <CardContent className="p-0">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6">
@@ -102,7 +113,7 @@ export function BasicDetailsForm({
                     htmlFor="firstName"
                     className="text-sm font-medium text-gray-700"
                   >
-                    First Name *
+                    First Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="firstName"
@@ -134,7 +145,7 @@ export function BasicDetailsForm({
                     htmlFor="lastName"
                     className="text-sm font-medium text-gray-700"
                   >
-                    Last Name *
+                    Last Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="lastName"
@@ -172,7 +183,7 @@ export function BasicDetailsForm({
                   htmlFor="email"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Email Address *
+                  Email Address <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -207,25 +218,35 @@ export function BasicDetailsForm({
                   htmlFor="contactNumber"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Contact Number *
+                  Contact Number <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="contactNumber"
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="Enter your contact number"
-                  value={data.contactNumber}
-                  onChange={(e) => {
-                    const digitsOnly = e.target.value.replace(/\D/g, "");
-                    handleInputChange("contactNumber", digitsOnly);
-                  }}
-                  className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
-                    errors.contactNumber &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
-                  )}
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center border-r pr-3 pl-3 text-base text-gray-700">
+                    {dialCode}
+                  </div>
+                  <Input
+                    id="contactNumber"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Enter your contact number"
+                    value={data.contactNumber}
+                    onChange={(e) => {
+                      const trimmed = e.target.value.replace(/\s+/g, "");
+                      const digitsOnly = trimmed.replace(/\D/g, "");
+                      const noLeadingZero = digitsOnly.startsWith("0")
+                        ? digitsOnly.slice(1)
+                        : digitsOnly;
+                      const limited = noLeadingZero.slice(0, 9);
+                      handleInputChange("contactNumber", limited);
+                    }}
+                    className={cn(
+                      "h-10 rounded-lg pl-16 border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
+                      errors.contactNumber &&
+                        "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
+                    )}
+                  />
+                </div>
                 {errors.contactNumber && (
                   <motion.p
                     initial={{ opacity: 0, height: 0 }}
@@ -247,22 +268,55 @@ export function BasicDetailsForm({
                   htmlFor="idNumber"
                   className="text-sm font-medium text-gray-700"
                 >
-                  NIC/ Driving License/ Passport Number *
+                  Identification <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="idNumber"
-                  type="text"
-                  placeholder="Enter your ID number"
-                  value={data.idNumber}
-                  onChange={(e) =>
-                    handleInputChange("idNumber", e.target.value)
-                  }
-                  className={cn(
-                    "h-10 rounded-lg border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
-                    errors.idNumber &&
-                      "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
-                  )}
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center border-r">
+                    <Select
+                      value={(data.idType as string) || "NIC"}
+                      onValueChange={(val) =>
+                        handleInputChange("idType" as any, val)
+                      }
+                    >
+                      <SelectTrigger className="h-10 rounded-l-lg rounded-r-none border-r-0 w-36 pl-3 pr-6 text-left text-base">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem className="text-left" value="NIC">
+                          NIC
+                        </SelectItem>
+                        <SelectItem
+                          className="text-left"
+                          value="Driving License"
+                        >
+                          Driving License
+                        </SelectItem>
+                        <SelectItem
+                          className="text-left"
+                          value="Passport Number"
+                        >
+                          Passport Number
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Input
+                    id="idNumber"
+                    type="text"
+                    placeholder={`Enter your ${(
+                      (data.idType as string) || "NIC"
+                    ).toLowerCase()}`}
+                    value={data.idNumber}
+                    onChange={(e) =>
+                      handleInputChange("idNumber", e.target.value)
+                    }
+                    className={cn(
+                      "h-10 rounded-lg pl-40 border-gray-200 focus:border-[#0E5344] focus:ring-[#0E5344]/20 text-base",
+                      errors.idNumber &&
+                        "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-base"
+                    )}
+                  />
+                </div>
                 {errors.idNumber && (
                   <motion.p
                     initial={{ opacity: 0, height: 0 }}

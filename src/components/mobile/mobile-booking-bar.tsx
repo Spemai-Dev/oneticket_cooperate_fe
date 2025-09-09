@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Clock, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TicketTier } from "@/components/page/ticket-tier";
+import { ScheduleSelector } from "@/components/page/schedule-selector";
 
 interface Ticket {
   id: number;
@@ -14,7 +15,7 @@ interface Ticket {
   ticket_amount?: string;
   ticket_visualize_amount?: string;
   remaining_tickets: string;
-  is_delete:boolean,
+  is_delete: boolean;
   is_sold_out: boolean;
   is_active?: boolean;
   is_free_ticket?: boolean;
@@ -41,6 +42,72 @@ export function MobileBookingBar({
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<{
+    location?: string;
+    date?: string;
+    time?: string;
+  }>({});
+
+  // Venue and time mapping based on location
+  const locationData = {
+    Colombo: {
+      venue: "Monarch Imperial, Colombo, Sri Lanka",
+      mapUrl: "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8",
+      times: {
+        "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+        "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+        "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+        "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+      },
+    },
+    Kandy: {
+      venue: "Earl's Regency Hotel, Kandy, Sri Lanka",
+      mapUrl: "https://maps.app.goo.gl/kandy-venue",
+      times: {
+        "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+        "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+        "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+        "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+      },
+    },
+    Galle: {
+      venue: "Jetwing Lighthouse, Galle, Sri Lanka",
+      mapUrl: "https://maps.app.goo.gl/galle-venue",
+      times: {
+        "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+        "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+        "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+        "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+      },
+    },
+  };
+
+  // Helper function to get current venue and time
+  const getCurrentVenue = () => {
+    const location = selectedSchedule.location || "Colombo";
+    return (
+      locationData[location as keyof typeof locationData]?.venue ||
+      "Monarch Imperial, Colombo, Sri Lanka"
+    );
+  };
+
+  const getCurrentTime = () => {
+    const location = selectedSchedule.location || "Colombo";
+    const time = selectedSchedule.time || "08:00 AM";
+    const locationInfo = locationData[location as keyof typeof locationData];
+    if (locationInfo && time in locationInfo.times) {
+      return locationInfo.times[time as keyof typeof locationInfo.times];
+    }
+    return "08:00 AM – 07:00 PM (GMT +5:30)";
+  };
+
+  const getCurrentMapUrl = () => {
+    const location = selectedSchedule.location || "Colombo";
+    return (
+      locationData[location as keyof typeof locationData]?.mapUrl ||
+      "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+    );
+  };
 
   // Cleanup on unmount to prevent message port errors
   useEffect(() => {
@@ -172,7 +239,7 @@ export function MobileBookingBar({
                 className="flex items-center justify-between px-4 py-3 border-b border-gray-100"
                 onTouchStart={handleHeaderTouchStart}
               >
-                <h2 className="text-lg font-bold">Select Tickets</h2>
+                <h2 className="text-lg font-bold">Event Details & Tickets</h2>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -183,21 +250,68 @@ export function MobileBookingBar({
                 </Button>
               </div>
 
+              {/* Schedule Selector */}
+              {/* <div className="px-4 py-2">
+                <ScheduleSelector
+                  title="Select the location, date, and time you prefer"
+                  locations={["Colombo", "Kandy", "Galle"]}
+                  dates={["Fri, 29 Sep", "Sat, 30 Sep"]}
+                  times={["08:00 AM", "10:00 AM", "02:00 PM", "04:00 PM"]}
+                  onChange={(selection) => {
+                    console.log("Schedule selection:", selection);
+                    setSelectedSchedule(selection);
+                  }}
+                />
+              </div> */}
+
+              {/* Event Info Section */}
+              <div className="px-4 py-2">
+                <div className="p-4 rounded-3xl border border-gray-200 bg-white">
+                  <h3 className="font-bold mb-3 text-base">
+                    {"29th and 30th September 2025"}
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3 mr-2 flex-shrink-0" />
+                      <span>{getCurrentTime()}</span>
+                    </div>
+                    <div className="flex items-start text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3 mr-2 mt-0.5 flex-shrink-0" />
+                      <span className="leading-relaxed">
+                        {getCurrentVenue()}
+                      </span>
+                    </div>
+                    <Button
+                      asChild
+                      className="w-full mt-3 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs py-2"
+                    >
+                      <a
+                        href={getCurrentMapUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View on map
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               {/* Ticket Selection */}
               <div className="flex-1 overflow-y-auto px-4">
                 <div className="space-y-1 py-4">
                   {tickets
-                    .filter(ticket => !ticket.is_delete)
-                    .map(ticket => (
+                    .filter((ticket) => !ticket.is_delete)
+                    .map((ticket) => (
                       <TicketTier
                         key={ticket.id}
                         ticket={ticket}
                         quantity={quantities[ticket.id] || 0}
-                      onQuantityChange={(newQuantity) =>
-                        updateQuantity(ticket.id, newQuantity)
-                      }
+                        onQuantityChange={(newQuantity) =>
+                          updateQuantity(ticket.id, newQuantity)
+                        }
                       />
-                  ))}
+                    ))}
                 </div>
               </div>
 
@@ -248,15 +362,16 @@ export function MobileBookingBar({
                             ? "Please select at least one from all compulsory tickets"
                             : "Please select at least one ticket",
                           {
-                          style: {
-                            background: "#fff",
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "0.75rem",
-                            boxShadow:
-                              "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                          },
-                          duration: 3000,
-                        });
+                            style: {
+                              background: "#fff",
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "0.75rem",
+                              boxShadow:
+                                "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                            },
+                            duration: 3000,
+                          }
+                        );
                         return;
                       }
                       setIsLoading(true);

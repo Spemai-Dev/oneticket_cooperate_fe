@@ -39,7 +39,7 @@ export function Navigation() {
               </Link>
             </motion.div>
           </nav>
-          <div className="flex flex-1 items-center justify-end space-x-2">
+          {/* <div className="flex flex-1 items-center justify-end space-x-2">
             <nav className="flex items-center">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -53,7 +53,7 @@ export function Navigation() {
                 </Button>
               </motion.div>
             </nav>
-          </div>
+          </div> */}
         </div>
       </motion.header>
     </motion.div>

@@ -11,43 +11,121 @@ interface TicketTierProps {
 }
 
 export function TicketTier({
-ticket, quantity, onQuantityChange 
+  ticket,
+  quantity,
+  onQuantityChange,
 }: TicketTierProps) {
   const remaining = parseInt(ticket.remaining_tickets);
-  const isDisabled =
-    !ticket.is_active || ticket.is_sold_out || remaining === 0;
+  const isDisabled = !ticket.is_active || ticket.is_sold_out || remaining === 0;
 
   const priceNumber = parseFloat(ticket.ticket_amount || "0");
-  const priceLabel = ticket.is_free_ticket ? "Free" : `LKR ${priceNumber.toLocaleString()}`;
+  const priceLabel = ticket.is_free_ticket
+    ? "Free"
+    : `LKR ${priceNumber.toLocaleString()}`;
   const totalCost = ticket.is_free_ticket ? 0 : quantity * priceNumber;
 
   const disableMinus = quantity <= 0 || isDisabled;
   const disablePlus = quantity >= remaining || isDisabled;
   return (
-    <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 border-b gap-3 sm:gap-0">
-      <div className="flex-1 sm:flex-none">
-        <p
-          className={`font-semibold text-sm sm:text-base ${
-            ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
-          }`}
-        >
-          {ticket.ticket_name}{" "}
-          {ticket.is_compulsory && (
-            <span className="ml-2 text-xs text-red-500 ">
-              *
-            </span>
-          )}
-          {(ticket.is_sold_out || remaining === 0) && " (Sold Out)"}
-        </p>
-        {ticket.show_remaining_tickets && remaining > 0 && !ticket.is_sold_out && (
-          <p className="text-xs text-gray-500">{remaining} tickets left</p>
-        )}
-      </div>
+    <div className="w-full flex flex-col gap-3 border-b pb-4">
+      <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 gap-3 sm:gap-0">
+        <div className="flex-1 sm:flex-none">
+          <p
+            className={`font-semibold text-sm sm:text-base lg:w-24 2xl:w-72 ${
+              ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
+            }`}
+          >
+            {ticket.ticket_name}{" "}
+            {ticket.is_compulsory && (
+              <span className="ml-2 text-xs text-red-500 ">*</span>
+            )}
+            {(ticket.is_sold_out || remaining === 0) && " (Sold Out)"}
+          </p>
+        </div>
 
-      {/* Mobile Layout */}
-      <div className="flex flex-col gap-3 sm:hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        {/* Mobile Layout */}
+        <div className="flex flex-col gap-3 sm:hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onQuantityChange(Math.max(0, quantity - 1))}
+                  disabled={disableMinus}
+                  className="transition-colors duration-150 h-8 w-8"
+                >
+                  <motion.div
+                    animate={{ rotate: quantity > 0 ? 0 : -180 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Minus className="h-3 w-3" />
+                  </motion.div>
+                </Button>
+              </motion.div>
+
+              <motion.span
+                animate={{
+                  scale: [1, 1.2, 1],
+                  color: quantity > 0 ? "#0E5344" : "#000000",
+                }}
+                transition={{
+                  scale: { duration: 0.2, ease: "easeOut" },
+                  color: { duration: 0.3 },
+                }}
+                className="w-8 text-center font-medium min-w-[2rem] flex items-center justify-center"
+              >
+                {quantity}
+              </motion.span>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onQuantityChange(quantity + 1)}
+                  disabled={disablePlus}
+                  className="transition-colors duration-150 h-8 w-8"
+                >
+                  <motion.div
+                    animate={{ rotate: 0 }}
+                    whileTap={{ rotate: 90 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </motion.div>
+                </Button>
+              </motion.div>
+            </div>
+
+            <motion.p
+              animate={{
+                scale: [1, 1.05, 1],
+                color: quantity > 0 ? "#0E5344" : "#000000",
+              }}
+              transition={{
+                scale: { duration: 0.2, ease: "easeOut" },
+                color: { duration: 0.3 },
+              }}
+              className="font-semibold text-sm"
+            >
+              {quantity > 0 && !ticket.is_free_ticket
+                ? `LKR ${totalCost.toLocaleString()}`
+                : priceLabel}
+            </motion.p>
+          </div>
+        </div>
+
+        {/* Desktop/Tablet Layout */}
+        <div className="hidden sm:flex items-center gap-2 md:gap-4 justify-end">
+          <div className="flex items-center gap-1 md:gap-2">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -55,16 +133,16 @@ ticket, quantity, onQuantityChange
             >
               <Button
                 variant="outline"
-                size="sm"
+                size="icon"
                 onClick={() => onQuantityChange(Math.max(0, quantity - 1))}
                 disabled={disableMinus}
-                className="transition-colors duration-150 h-8 w-8"
+                className="transition-colors duration-150 h-8 w-8 md:h-10 md:w-10"
               >
                 <motion.div
                   animate={{ rotate: quantity > 0 ? 0 : -180 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Minus className="h-3 w-3" />
+                  <Minus className="h-3 w-3 md:h-4 md:w-4" />
                 </motion.div>
               </Button>
             </motion.div>
@@ -78,7 +156,7 @@ ticket, quantity, onQuantityChange
                 scale: { duration: 0.2, ease: "easeOut" },
                 color: { duration: 0.3 },
               }}
-              className="w-8 text-center font-medium min-w-[2rem] flex items-center justify-center"
+              className="w-6 md:w-8 text-center font-medium min-w-[1.5rem] md:min-w-[2rem] flex items-center justify-center text-sm md:text-base"
             >
               {quantity}
             </motion.span>
@@ -90,17 +168,17 @@ ticket, quantity, onQuantityChange
             >
               <Button
                 variant="outline"
-                size="sm"
+                size="icon"
                 onClick={() => onQuantityChange(quantity + 1)}
                 disabled={disablePlus}
-                className="transition-colors duration-150 h-8 w-8"
+                className="transition-colors duration-150 h-8 w-8 md:h-10 md:w-10"
               >
                 <motion.div
                   animate={{ rotate: 0 }}
                   whileTap={{ rotate: 90 }}
                   transition={{ duration: 0.1 }}
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-3 w-3 md:h-4 md:w-4" />
                 </motion.div>
               </Button>
             </motion.div>
@@ -115,92 +193,24 @@ ticket, quantity, onQuantityChange
               scale: { duration: 0.2, ease: "easeOut" },
               color: { duration: 0.3 },
             }}
-            className="font-semibold text-sm"
+            className="font-semibold min-w-[4rem] md:min-w-[6rem] text-right text-sm md:text-base"
           >
-          {quantity > 0 && !ticket.is_free_ticket
-            ? `LKR ${totalCost.toLocaleString()}`
-            : priceLabel}
+            {quantity > 0 && !ticket.is_free_ticket
+              ? `LKR ${totalCost.toLocaleString()}`
+              : priceLabel}
           </motion.p>
         </div>
       </div>
-
-      {/* Desktop/Tablet Layout */}
-      <div className="hidden sm:flex items-center gap-2 md:gap-4 justify-end">
-        <div className="flex items-center gap-1 md:gap-2">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          >
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => onQuantityChange(Math.max(0, quantity - 1))}
-              disabled={disableMinus}
-              className="transition-colors duration-150 h-8 w-8 md:h-10 md:w-10"
-            >
-              <motion.div
-                animate={{ rotate: quantity > 0 ? 0 : -180 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Minus className="h-3 w-3 md:h-4 md:w-4" />
-              </motion.div>
-            </Button>
-          </motion.div>
-
-          <motion.span
-            animate={{
-              scale: [1, 1.2, 1],
-              color: quantity > 0 ? "#0E5344" : "#000000",
-            }}
-            transition={{
-              scale: { duration: 0.2, ease: "easeOut" },
-              color: { duration: 0.3 },
-            }}
-            className="w-6 md:w-8 text-center font-medium min-w-[1.5rem] md:min-w-[2rem] flex items-center justify-center text-sm md:text-base"
-          >
-            {quantity}
-          </motion.span>
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          >
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => onQuantityChange(quantity + 1)}
-              disabled={disablePlus}
-              className="transition-colors duration-150 h-8 w-8 md:h-10 md:w-10"
-            >
-              <motion.div
-                animate={{ rotate: 0 }}
-                whileTap={{ rotate: 90 }}
-                transition={{ duration: 0.1 }}
-              >
-                <Plus className="h-3 w-3 md:h-4 md:w-4" />
-              </motion.div>
-            </Button>
-          </motion.div>
-        </div>
-
-        <motion.p
-          animate={{
-            scale: [1, 1.05, 1],
-            color: quantity > 0 ? "#0E5344" : "#000000",
-          }}
-          transition={{
-            scale: { duration: 0.2, ease: "easeOut" },
-            color: { duration: 0.3 },
-          }}
-          className="font-semibold min-w-[4rem] md:min-w-[6rem] text-right text-sm md:text-base"
-        >
-          {quantity > 0 && !ticket.is_free_ticket
-            ? `LKR ${totalCost.toLocaleString()}`
-            : priceLabel}
-        </motion.p>
-      </div>
+      {ticket.show_remaining_tickets &&
+        remaining > 0 &&
+        !ticket.is_sold_out && (
+          <p className="text-xs text-gray-500">{remaining} tickets left</p>
+        )}
+      {ticket.ticket_description && (
+        <p className="text-xs text-gray-600 ">
+          {ticket.ticket_description}
+        </p>
+      )}
     </div>
   );
 }

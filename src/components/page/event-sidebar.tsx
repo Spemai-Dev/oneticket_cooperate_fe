@@ -7,6 +7,7 @@ import { Loader2, Clock, MapPin } from "lucide-react";
 import { TicketTier } from "./ticket-tier";
 import { EventLineup } from "./event-lineup";
 import { AboutEvent } from "./about-event";
+// import { ScheduleSelector } from "./schedule-selector";
 import { motion } from "framer-motion";
 import { MobileBookingBar } from "@/components/mobile/mobile-booking-bar";
 import { toast } from "sonner";
@@ -20,62 +21,137 @@ export function EventSidebar() {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [tickets, setTickets] = useState<any[]>([]);
   const [eventDetails, setEventDetails] = useState<any>(null);
+  // const [selectedSchedule, setSelectedSchedule] = useState<{
+  //   location?: string;
+  //   date?: string;
+  //   time?: string;
+  // }>({});
 
-  const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } = useBooking();
+  const { setEventMeta, setDynamicFields, setSelectedTicketsFromQuantities } =
+    useBooking();
 
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "OT4W11909A75BC2F388C5";
 
-useEffect(() => {
-  if (!EVENT_ID) {
-    toast.error("Event ID is not set!");
-    return;
-  }
+  // // Venue and time mapping based on location
+  // const locationData = {
+  //   Colombo: {
+  //     venue: "Monarch Imperial, Colombo, Sri Lanka",
+  //     mapUrl: "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8",
+  //     times: {
+  //       "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+  //       "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+  //       "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+  //       "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+  //     },
+  //   },
+  //   Kandy: {
+  //     venue: "Earl's Regency Hotel, Kandy, Sri Lanka",
+  //     mapUrl: "https://maps.app.goo.gl/kandy-venue",
+  //     times: {
+  //       "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+  //       "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+  //       "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+  //       "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+  //     },
+  //   },
+  //   Galle: {
+  //     venue: "Jetwing Lighthouse, Galle, Sri Lanka",
+  //     mapUrl: "https://maps.app.goo.gl/galle-venue",
+  //     times: {
+  //       "08:00 AM": "08:00 AM – 07:00 PM (GMT +5:30)",
+  //       "10:00 AM": "10:00 AM – 09:00 PM (GMT +5:30)",
+  //       "02:00 PM": "02:00 PM – 11:00 PM (GMT +5:30)",
+  //       "04:00 PM": "04:00 PM – 01:00 AM (GMT +5:30)",
+  //     },
+  //   },
+  // };
 
-  const fetchEvent = async () => {
-    try {
-      const res = await axios.get(
-        `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
-      );
-      const data = res.data?.data;
+  // // Helper function to get current venue and time
+  // const getCurrentVenue = () => {
+  //   const location = selectedSchedule.location || "Colombo";
+  //   return (
+  //     locationData[location as keyof typeof locationData]?.venue ||
+  //     "Monarch Imperial, Colombo, Sri Lanka"
+  //   );
+  // };
 
-      if (!data) {
-        toast.error("Event not found");
-        return;
-      }
+  // const getCurrentTime = () => {
+  //   const location = selectedSchedule.location || "Colombo";
+  //   const time = selectedSchedule.time || "08:00 AM";
+  //   const locationInfo = locationData[location as keyof typeof locationData];
+  //   if (locationInfo && time in locationInfo.times) {
+  //     return locationInfo.times[time as keyof typeof locationInfo.times];
+  //   }
+  //   return "08:00 AM – 07:00 PM (GMT +5:30)";
+  // };
 
-      setEventDetails(data);
+  // const getCurrentMapUrl = () => {
+  //   const location = selectedSchedule.location || "Colombo";
+  //   return (
+  //     locationData[location as keyof typeof locationData]?.mapUrl ||
+  //     "https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+  //   );
+  // };
 
-      // save eventMeta immediately
-      setEventMeta({
-        id: data.id,
-        name: data.event_name,
-        dateTime: data.event_datetime,
-        expireOn: data.event_expire_on,
-        venue: data.venue,
-        currency: data.tickets_currency,
-      });
-
-      // filter out deleted tickets
-      const validTickets = (data.tickets || []).filter(
-        (t: any) => !t.is_delete
-      );
-      setTickets(validTickets);
-
-      // initialize ticket quantities
-      const initialQuantities: Record<number, number> = {};
-      validTickets.forEach((t: any) => {
-        initialQuantities[t.id] = t.is_compulsory ? 1 : 0;
-      });
-      setQuantities(initialQuantities);
-
-    } catch (error) {
-      console.error("Error fetching event:", error);
-      toast.error("Failed to load event details");
+  useEffect(() => {
+    if (!EVENT_ID) {
+      toast.error("Event ID is not set!");
+      return;
     }
-  };
+    const fetchEventData = async () => {
+      try {
+        // Fetch event details
+        const resEvent = await axios.get(
+          `${environment.EVENT_URL}/get-details/?id=${EVENT_ID}`
+        );
+        const eventData = resEvent.data?.data;
+        if (!eventData) throw new Error("Event details not found");
+        setEventDetails(eventData);
 
-  fetchEvent();
-}, [EVENT_ID]);
+        // Set event meta for context
+        setEventMeta({
+          id: eventData.id,
+          name: eventData.event_name,
+          dateTime: eventData.event_datetime,
+          expireOn: eventData.event_expire_on,
+          venue: eventData.venue,
+          currency: eventData.tickets_currency,
+        });
+
+        // Set dynamic fields
+        setDynamicFields(eventData.fields || []);
+
+        // Fetch tickets
+        const resTickets = await axios.get(
+          `https://oneticket.onepay.lk/api/v3/oneticket/user/event/tickets-by-slot/`,
+          {
+            params: {
+              event_id: EVENT_ID,
+              venue: "Colombo",
+              day: "2025-09-29",
+              start_time: "08:00",
+            },
+          }
+        );
+
+        const ticketsData = resTickets.data?.data || [];
+        const validTickets = ticketsData.filter((t: any) => !t.is_delete);
+        setTickets(validTickets);
+
+        // Initialize ticket quantities
+        const initialQuantities: Record<number, number> = {};
+        validTickets.forEach((t: any) => {
+          initialQuantities[t.id] = t.is_compulsory ? 1 : 0;
+        });
+        setQuantities(initialQuantities);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load event or tickets");
+      }
+    };
+
+    fetchEventData();
+  }, [EVENT_ID]);
 
   // Update quantity — pure, no context updates here
   const updateQuantity = (ticketId: number, newQuantity: number) => {
@@ -101,49 +177,64 @@ useEffect(() => {
   }, 0);
 
   const handleGetTickets = async () => {
-  const totalTickets = Object.values(quantities).reduce(
-    (sum, qty) => sum + qty,
-    0
-  );
-
-  // Check compulsory tickets
-  const visibleTickets = tickets.filter((t) => !t.is_delete);
-  const compulsoryTickets = visibleTickets.filter((t) => t.is_compulsory);
-  const missingCompulsory = compulsoryTickets.some(
-    (t) => !(quantities[t.id] > 0)
-  );
-
-  if (totalTickets === 0 || missingCompulsory) {
-    toast.error(
-      missingCompulsory
-        ? "Please select at least one from all compulsory tickets"
-        : "Please select at least one ticket"
+    const totalTickets = Object.values(quantities).reduce(
+      (sum, qty) => sum + qty,
+      0
     );
-    return;
-  }
 
-  // 🔹 This updates context → which triggers localStorage update automatically
-  setSelectedTicketsFromQuantities(tickets, quantities);
+    // Check compulsory tickets
+    const visibleTickets = tickets.filter((t) => !t.is_delete);
+    const compulsoryTickets = visibleTickets.filter((t) => t.is_compulsory);
+    const missingCompulsory = compulsoryTickets.some(
+      (t) => !(quantities[t.id] > 0)
+    );
 
-  setEventMeta({
-    id: eventDetails.id,
-    name: eventDetails.event_name,
-    dateTime: eventDetails.event_datetime,
-    expireOn: eventDetails.event_expire_on,
-    venue: eventDetails.venue,
-    currency: eventDetails.tickets_currency,
-  });
+    if (totalTickets === 0 || missingCompulsory) {
+      toast.error(
+        missingCompulsory
+          ? "Please select at least one from all compulsory tickets"
+          : "Please select at least one ticket"
+      );
+      return;
+    }
 
-  setDynamicFields(eventDetails.fields || []);
+    // 🔹 This updates context → which triggers localStorage update automatically
+    setSelectedTicketsFromQuantities(tickets, quantities);
 
-  setIsLoading(true);
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  router.push("/booking");
-};
+    // setEventMeta({
+    //   id: eventDetails.id,
+    //   name: eventDetails.event_name,
+    //   dateTime: eventDetails.event_datetime,
+    //   expireOn: eventDetails.event_expire_on,
+    //   venue: eventDetails.venue,
+    //   currency: eventDetails.tickets_currency,
+    // });
+
+    setDynamicFields(eventDetails.fields || []);
+
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    router.push("/booking");
+  };
 
   return (
     <>
       <div className="w-full lg:col-span-1 space-y-4">
+        {/* Schedule Selector */}
+        {/* <div className="hidden lg:block">
+          <ScheduleSelector
+            title="Select the location, date, and time you prefer"
+            locations={["Colombo", "Kandy", "Galle"]}
+            dates={["Fri, 29 Sep", "Sat, 30 Sep"]}
+            times={["08:00 AM", "10:00 AM", "02:00 PM", "04:00 PM"]}
+            onChange={(selection) => {
+              console.log("Schedule selection:", selection);
+              setSelectedSchedule(selection);
+            }}
+          />
+        </div> */}
+
+
         <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
           {tickets.length === 0 ? (
             <p className="text-sm text-gray-500">Loading tickets...</p>
@@ -191,7 +282,7 @@ useEffect(() => {
           </motion.div>
 
           <Button
-onClick={handleGetTickets}
+            onClick={handleGetTickets}
             disabled={isLoading}
             className="w-full mt-4 sm:mt-6 text-white rounded-full text-sm sm:text-base py-2 sm:py-3 transition-all duration-200 bg-[#0E5344] hover:bg-[#0E5344]/90"
           >
@@ -206,11 +297,11 @@ onClick={handleGetTickets}
           </Button>
         </div>
 
-        {/* Event Info */}
+{/* Event Info */}
         {eventDetails && (
           <div className="hidden lg:block p-4 sm:p-6 rounded-3xl border border-gray-200 bg-white">
-            <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg">
-              {new Date(eventDetails.event_datetime).toLocaleDateString(
+            <h3 className="font-bold mb-1 sm:mb-2 text-base sm:text-lg">
+              {/* {new Date(eventDetails.event_datetime).toLocaleDateString(
                 "en-US",
                 {
                   weekday: "long",
@@ -218,13 +309,14 @@ onClick={handleGetTickets}
                   month: "long",
                   day: "numeric",
                 }
-              )}
+              )} */}
+              29th and 30th September 2025
             </h3>
             <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-4 sm:items-end">
               <div className="sm:col-span-2 space-y-2">
                 <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                  <span>
+                  {/* <span>
                     {new Date(eventDetails.event_datetime).toLocaleTimeString(
                       [],
                       {
@@ -237,23 +329,36 @@ onClick={handleGetTickets}
                       [],
                       { hour: "2-digit", minute: "2-digit" }
                     )}
-                  </span>
+                  </span> */}
+                  <span>08:00 AM – 07:00 PM (11 hours)</span>
                 </div>
                 <div className="flex items-start text-xs sm:text-sm text-muted-foreground">
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="leading-relaxed">{eventDetails.venue}</span>
+                  <span className="leading-relaxed">
+                    {/* {eventDetails.venue} */}
+                    Monarch Imperial, Colombo, Sri Lanka
+                    </span>
                 </div>
               </div>
-              <Button className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2">
-                View on map
+              <Button
+                asChild
+                className="w-full sm:w-auto mt-2 sm:mt-6 bg-[#fff] hover:bg-[#344054]/10 text-[#344054] border border-gray-200 rounded-full text-xs sm:text-sm py-2"
+              >
+                <a
+                  href="https://maps.app.goo.gl/m4ta6Qu2Cxw3tjFp8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on map
+                </a>
               </Button>
             </div>
           </div>
         )}
 
-        <div className="pt-4 hidden lg:block">
+        {/* <div className="pt-4 hidden lg:block">
           <EventLineup />
-        </div>
+        </div> */}
         <div className="pt-4 hidden lg:block">
           <AboutEvent />
         </div>

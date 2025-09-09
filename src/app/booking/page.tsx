@@ -39,7 +39,7 @@ export default function BookingPage() {
   const [bookingData, setBookingData] =
     useState<BookingData>(initialBookingData);
   const [fields, setFields] = useState<Field[]>([]);
-  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || '4XTU119096405A4DE629A';
+  const EVENT_ID = process.env.NEXT_PUBLIC_EVENT_ID || "OT4W11909A75BC2F388C5";
 
   // Fetch dynamic fields from API
   useEffect(() => {
@@ -138,7 +138,7 @@ export default function BookingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-3xl border border-gray-200 shadow-lg overflow-hidden"
+          className="bg-white rounded-3xl border border-gray-200 shadow-lg overflow-visible"
         >
           <div className="p-6 sm:p-8 lg:p-10">
             <motion.h1
