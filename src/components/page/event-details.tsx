@@ -9,6 +9,7 @@ import { Sponsors } from "./sponsors";
 import { EventLineup } from "./event-lineup";
 import { AboutEvent } from "./about-event";
 import { TermsAndConditions } from "./terms-conditions";
+import { KeyNoteSpeaker } from "./keynote-speaker";
 
 export function EventDetails() {
   return (
@@ -64,6 +65,7 @@ export function EventDetails() {
       {/* Mobile-specific sections after agenda */}
       <div className="lg:hidden space-y-4 sm:space-y-6">
         <AboutEvent />
+        <KeyNoteSpeaker />
         {/* <Sponsors /> */}
         {/* <TermsAndConditions /> */}
         {/* <RefundPolicy /> */}
@@ -71,6 +73,7 @@ export function EventDetails() {
 
       {/* Desktop-only sections (original order) */}
       <div className="hidden lg:block space-y-4 sm:space-y-6 lg:space-y-8 mb-8">
+        <KeyNoteSpeaker />
         {/* <TermsAndConditions /> */}
         {/* <RefundPolicy /> */}
         {/* <Sponsors /> */}

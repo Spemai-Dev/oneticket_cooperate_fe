@@ -13,13 +13,13 @@ export const metadata: Metadata = {
     "OneTicket | Sri Lanka's Most Convenient Event Hosting & Ticketing Platform",
   description:
     "Discover and host the best events in Sri Lanka with OneTicket. From concerts and festivals to sports and conferences — buy, sell, and manage tickets effortlessly.",
-  metadataBase: new URL("https://aiexpo.oneticket.lk"),
+  metadataBase: new URL("https://slra.oneticket.lk/"),
   openGraph: {
     type: "website",
     title: "OneTicket | Host & Discover Events in Sri Lanka",
     description:
       "Your go-to platform for event hosting and ticketing. Explore top events, sell tickets, and grow your audience with ease.",
-    url: "https://aiexpo.oneticket.lk",
+    url: "https://slra.oneticket.lk/",
     siteName: "OneTicket",
   },
   twitter: {
