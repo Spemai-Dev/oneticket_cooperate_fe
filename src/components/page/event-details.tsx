@@ -57,21 +57,21 @@ export function EventDetails() {
 
       {/* Agenda Section */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Agenda</h2>
-        <Agenda />
+        {/* <h2 className="text-2xl font-bold mb-4">Agenda</h2>
+        <Agenda /> */}
       </div>
 
       {/* Mobile-specific sections after agenda */}
       <div className="lg:hidden space-y-4 sm:space-y-6">
         <AboutEvent />
         {/* <Sponsors /> */}
-        <TermsAndConditions />
+        {/* <TermsAndConditions /> */}
         {/* <RefundPolicy /> */}
       </div>
 
       {/* Desktop-only sections (original order) */}
       <div className="hidden lg:block space-y-4 sm:space-y-6 lg:space-y-8 mb-8">
-        <TermsAndConditions />
+        {/* <TermsAndConditions /> */}
         {/* <RefundPolicy /> */}
         {/* <Sponsors /> */}
       </div>
