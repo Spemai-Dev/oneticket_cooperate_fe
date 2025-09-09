@@ -251,7 +251,7 @@ export function MobileBookingBar({
               </div>
 
               {/* Schedule Selector */}
-              <div className="px-4 py-2">
+              {/* <div className="px-4 py-2">
                 <ScheduleSelector
                   title="Select the location, date, and time you prefer"
                   locations={["Colombo", "Kandy", "Galle"]}
@@ -262,7 +262,7 @@ export function MobileBookingBar({
                     setSelectedSchedule(selection);
                   }}
                 />
-              </div>
+              </div> */}
 
               {/* Event Info Section */}
               <div className="px-4 py-2">
