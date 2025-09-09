@@ -212,7 +212,7 @@ export function EventSidebar() {
     <>
       <div className="w-full lg:col-span-1 space-y-4">
         {/* Schedule Selector */}
-        <div className="hidden lg:block">
+        {/* <div className="hidden lg:block">
           <ScheduleSelector
             title="Select the location, date, and time you prefer"
             locations={["Colombo", "Kandy", "Galle"]}
@@ -223,7 +223,7 @@ export function EventSidebar() {
               setSelectedSchedule(selection);
             }}
           />
-        </div>
+        </div> */}
 
         {/* Event Info */}
         {eventDetails && (
