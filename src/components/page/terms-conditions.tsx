@@ -137,6 +137,10 @@ function TermsTable() {
                   <div className="text-sm text-gray-700 leading-relaxed">
                     The Virtual Access Pass is issued against the registration
                     details provided at the point of ticket purchase.
+                    <br />
+                    <br />
+                    Login credentials and access instructions will be sent to
+                    the registered email address on 25th September 2025.
                   </div>
                 </td>
               </tr>
@@ -166,10 +170,6 @@ function TermsTable() {
                   <div className="text-sm text-gray-700 leading-relaxed">
                     This pass provides access to the virtual platform for the AI
                     Expo &amp; Conference 2025 on 29-30 September 2025.
-                    <br />
-                    <br />
-                    Login credentials and access instructions will be sent to
-                    the registered email address on 25th September 2025.
                     <br />
                     <br />
                     The organizer reserves the right to restrict or revoke
