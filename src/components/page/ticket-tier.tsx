@@ -26,12 +26,27 @@ export function TicketTier({
     : `LKR ${priceNumber.toLocaleString()}`;
   const totalCost = ticket.is_free_ticket ? 0 : quantity * priceNumber;
 
+  // Only strike through the price inside the pass label (e.g., "LKR 25,000")
+  const fullPassLabel = passLabel || "";
+  const passPriceMatch = fullPassLabel.match(/LKR\s*[0-9,.]+/i);
+  const passOnlyPrice = passPriceMatch ? passPriceMatch[0] : "";
+  const passTextWithoutPrice = passPriceMatch
+    ? fullPassLabel.replace(passPriceMatch[0], "").trim()
+    : fullPassLabel;
+
   const disableMinus = quantity <= 0 || isDisabled;
   const disablePlus = quantity >= remaining || isDisabled;
   return (
     <div className="w-full flex flex-col gap-3 border-b pb-4">
       <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 gap-3 sm:gap-0">
         <div className="flex-1 sm:flex-none">
+          <p className="text-sm text-gray-500 lg:w-40">
+            {passTextWithoutPrice}
+            {passTextWithoutPrice && passOnlyPrice ? " " : ""}
+            {passOnlyPrice && (
+              <span className="line-through">{passOnlyPrice}</span>
+            )}
+          </p>
           <p
             className={`font-semibold text-sm sm:text-base lg:w-40 ${
               ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
@@ -43,7 +58,6 @@ export function TicketTier({
             )}
             {(ticket.is_sold_out || remaining === 0) && " (Sold Out)"}
           </p>
-          <p className="text-sm text-gray-500">{passLabel || ""}</p>
         </div>
 
         {/* Mobile Layout */}

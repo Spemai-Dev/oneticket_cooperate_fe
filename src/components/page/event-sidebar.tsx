@@ -248,7 +248,7 @@ export function EventSidebar() {
                   updateQuantity(ticket.id, newQuantity)
                 }
                 passLabel={
-                  ["Individual Pass", "Virtual Pass", "Corporate Pass"][
+                  ["Full Access Pass LKR 25,000", "Virtual Pass LKR 10,000", "Full Access Pass LKR 25,000"][
                     index
                   ] || ""
                 }
