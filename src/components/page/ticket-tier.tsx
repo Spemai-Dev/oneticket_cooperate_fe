@@ -8,12 +8,14 @@ interface TicketTierProps {
   ticket: any;
   quantity: number;
   onQuantityChange: (newQuantity: number) => void;
+  passLabel?: string;
 }
 
 export function TicketTier({
   ticket,
   quantity,
   onQuantityChange,
+  passLabel,
 }: TicketTierProps) {
   const remaining = parseInt(ticket.remaining_tickets);
   const isDisabled = !ticket.is_active || ticket.is_sold_out || remaining === 0;
@@ -31,7 +33,7 @@ export function TicketTier({
       <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 gap-3 sm:gap-0">
         <div className="flex-1 sm:flex-none">
           <p
-            className={`font-semibold text-sm sm:text-base lg:w-24 2xl:w-72 ${
+            className={`font-semibold text-sm sm:text-base lg:w-40 ${
               ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
             }`}
           >
@@ -41,6 +43,7 @@ export function TicketTier({
             )}
             {(ticket.is_sold_out || remaining === 0) && " (Sold Out)"}
           </p>
+          <p className="text-sm text-gray-500">{passLabel || ""}</p>
         </div>
 
         {/* Mobile Layout */}
@@ -207,9 +210,7 @@ export function TicketTier({
           <p className="text-xs text-gray-500">{remaining} tickets left</p>
         )}
       {ticket.ticket_description && (
-        <p className="text-xs text-gray-600 ">
-          {ticket.ticket_description}
-        </p>
+        <p className="text-xs text-gray-600 ">{ticket.ticket_description}</p>
       )}
     </div>
   );

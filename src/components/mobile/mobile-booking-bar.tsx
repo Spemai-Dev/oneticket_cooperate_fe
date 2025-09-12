@@ -302,13 +302,18 @@ export function MobileBookingBar({
                 <div className="space-y-1 py-4">
                   {tickets
                     .filter((ticket) => !ticket.is_delete)
-                    .map((ticket) => (
+                    .map((ticket, index) => (
                       <TicketTier
                         key={ticket.id}
                         ticket={ticket}
                         quantity={quantities[ticket.id] || 0}
                         onQuantityChange={(newQuantity) =>
                           updateQuantity(ticket.id, newQuantity)
+                        }
+                        passLabel={
+                          ["Individual Pass", "Virtual Pass", "Corporate Pass"][
+                            index
+                          ] || ""
                         }
                       />
                     ))}

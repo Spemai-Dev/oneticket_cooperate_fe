@@ -297,13 +297,18 @@ export function EventSidebar() {
           {tickets.length === 0 ? (
             <p className="text-sm text-gray-500">Loading tickets...</p>
           ) : (
-            tickets.map((ticket) => (
+            tickets.map((ticket, index) => (
               <TicketTier
                 key={ticket.id}
                 ticket={ticket}
                 quantity={quantities[ticket.id] || 0}
                 onQuantityChange={(newQuantity) =>
                   updateQuantity(ticket.id, newQuantity)
+                }
+                passLabel={
+                  ["Individual Pass", "Virtual Pass", "Corporate Pass"][
+                    index
+                  ] || ""
                 }
               />
             ))
