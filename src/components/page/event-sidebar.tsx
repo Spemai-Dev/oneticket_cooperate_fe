@@ -252,6 +252,7 @@ export function EventSidebar() {
                     index
                   ] || ""
                 }
+                specialTag={["Individual Pass", "", "Corporate Pass"][index] || ""}
               />
             ))
           )}

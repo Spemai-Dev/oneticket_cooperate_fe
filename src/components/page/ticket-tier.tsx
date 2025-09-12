@@ -9,6 +9,7 @@ interface TicketTierProps {
   quantity: number;
   onQuantityChange: (newQuantity: number) => void;
   passLabel?: string;
+  specialTag?: string;
 }
 
 export function TicketTier({
@@ -16,6 +17,7 @@ export function TicketTier({
   quantity,
   onQuantityChange,
   passLabel,
+  specialTag,
 }: TicketTierProps) {
   const remaining = parseInt(ticket.remaining_tickets);
   const isDisabled = !ticket.is_active || ticket.is_sold_out || remaining === 0;
@@ -34,19 +36,20 @@ export function TicketTier({
     ? fullPassLabel.replace(passPriceMatch[0], "").trim()
     : fullPassLabel;
 
+  const specialTagText = specialTag || "";
+
   const disableMinus = quantity <= 0 || isDisabled;
   const disablePlus = quantity >= remaining || isDisabled;
   return (
-    <div className="w-full flex flex-col gap-3 border-b pb-4">
+    <div className="w-full flex flex-col gap-3 border-b pb-4 pt-4">
+      <p className="text-sm font-semibold text-gray-700 lg:w-72 leading-0">{specialTagText}</p>
+      <p className="text-sm text-gray-500 lg:w-72">
+        {passTextWithoutPrice}
+        {passTextWithoutPrice && passOnlyPrice ? " " : ""}
+        {passOnlyPrice && <span className="line-through">{passOnlyPrice}</span>}
+      </p>
       <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 gap-3 sm:gap-0">
         <div className="flex-1 sm:flex-none">
-          <p className="text-sm text-gray-500 lg:w-40">
-            {passTextWithoutPrice}
-            {passTextWithoutPrice && passOnlyPrice ? " " : ""}
-            {passOnlyPrice && (
-              <span className="line-through">{passOnlyPrice}</span>
-            )}
-          </p>
           <p
             className={`font-semibold text-sm sm:text-base lg:w-40 ${
               ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""

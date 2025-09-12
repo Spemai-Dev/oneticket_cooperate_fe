@@ -315,6 +315,7 @@ export function MobileBookingBar({
                             index
                           ] || ""
                         }
+                        specialTag={["Individual Pass", "", "Corporate Pass"][index] || ""}
                       />
                     ))}
                 </div>
