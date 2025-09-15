@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
   useEffect,
+  useCallback,
   ReactNode,
 } from "react";
 
@@ -119,11 +120,11 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /** Unified localStorage saver */
-  const saveToLocalStorage = (key: string, value: any) => {
+  const saveToLocalStorage = useCallback((key: string, value: any) => {
     if (typeof window !== "undefined") {
       localStorage.setItem(key, JSON.stringify(value));
     }
-  };
+  }, []);
 
   /** ---- Helpers ---- */
   const toNumber = (v: any, fallback = 0): number => {
@@ -134,40 +135,40 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const isTruthy = (v: any) => !!v;
 
   /** Build selected tickets from API tickets + quantities */
-  const setSelectedTicketsFromQuantities = (
-    sourceTickets: ApiTicket[],
-    quantities: Record<number, number>
-  ) => {
-    // Build selected tickets synchronously
-    const items: SelectedTicket[] = sourceTickets
-      .filter((t) => !t.is_delete) // skip deleted
-      .map((t) => {
-        const qty = t.is_compulsory
-          ? Math.max(1, quantities[t.id] || 0)
-          : Math.max(0, quantities[t.id] || 0);
-        const isFree = !!t.is_free_ticket;
-        const unitPrice = isFree ? 0 : parseFloat(t.ticket_amount || "0");
+  const setSelectedTicketsFromQuantities = useCallback(
+    (sourceTickets: ApiTicket[], quantities: Record<number, number>) => {
+      // Build selected tickets synchronously
+      const items: SelectedTicket[] = sourceTickets
+        .filter((t) => !t.is_delete) // skip deleted
+        .map((t) => {
+          const qty = t.is_compulsory
+            ? Math.max(1, quantities[t.id] || 0)
+            : Math.max(0, quantities[t.id] || 0);
+          const isFree = !!t.is_free_ticket;
+          const unitPrice = isFree ? 0 : parseFloat(t.ticket_amount || "0");
 
-        return {
-          id: t.id,
-          name: t.ticket_name || `Ticket #${t.id}`,
-          quantity: qty,
-          unitPrice,
-          isFree,
-          subtotal: qty * unitPrice,
-          description: t.ticket_description,
-        };
-      })
-      .filter((t) => t.quantity > 0);
+          return {
+            id: t.id,
+            name: t.ticket_name || `Ticket #${t.id}`,
+            quantity: qty,
+            unitPrice,
+            isFree,
+            subtotal: qty * unitPrice,
+            description: t.ticket_description,
+          };
+        })
+        .filter((t) => t.quantity > 0);
 
-    // 🔹 Update state
-    setSelectedTicketsState(items);
+      // 🔹 Update state
+      setSelectedTicketsState(items);
 
-    // 🔹 Save **immediately** to localStorage
-    if (typeof window !== "undefined") {
-      localStorage.setItem("selectedTickets", JSON.stringify(items));
-    }
-  };
+      // 🔹 Save **immediately** to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("selectedTickets", JSON.stringify(items));
+      }
+    },
+    []
+  );
 
   /** Totals */
   const totalQuantity = useMemo(
@@ -181,64 +182,95 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   );
 
   /** ---- Setters with localStorage ---- */
-  const setEventMeta = (meta: EventMeta) => {
-    setEventMetaState(meta);
-    saveToLocalStorage("eventMeta", meta);
-  };
+  const setEventMeta = useCallback(
+    (meta: EventMeta) => {
+      setEventMetaState(meta);
+      saveToLocalStorage("eventMeta", meta);
+    },
+    [saveToLocalStorage]
+  );
 
-  const setSelectedTickets = (items: SelectedTicket[]) => {
-    setSelectedTicketsState(items);
-    saveToLocalStorage("selectedTickets", items);
-  };
+  const setSelectedTickets = useCallback(
+    (items: SelectedTicket[]) => {
+      setSelectedTicketsState(items);
+      saveToLocalStorage("selectedTickets", items);
+    },
+    [saveToLocalStorage]
+  );
 
-  const setPersonalDetails = (details: PersonalDetails) => {
-    setPersonalDetailsState(details);
-    saveToLocalStorage("personalDetails", details);
-  };
+  const setPersonalDetails = useCallback(
+    (details: PersonalDetails) => {
+      setPersonalDetailsState(details);
+      saveToLocalStorage("personalDetails", details);
+    },
+    [saveToLocalStorage]
+  );
 
-  const setAdditionalDetails = (
-    data: AdditionalDetails | ((prev: AdditionalDetails) => AdditionalDetails)
-  ) => {
-    setAdditionalDetailsState((prev) => {
-      const updated = typeof data === "function" ? data(prev) : data;
-      saveToLocalStorage("additionalDetails", updated);
-      return updated;
-    });
-  };
+  const setAdditionalDetails = useCallback(
+    (
+      data: AdditionalDetails | ((prev: AdditionalDetails) => AdditionalDetails)
+    ) => {
+      setAdditionalDetailsState((prev) => {
+        const updated = typeof data === "function" ? data(prev) : data;
+        saveToLocalStorage("additionalDetails", updated);
+        return updated;
+      });
+    },
+    [saveToLocalStorage]
+  );
 
   /** Reset helpers */
-  const resetCart = () => {
+  const resetCart = useCallback(() => {
     setSelectedTicketsState([]);
     saveToLocalStorage("selectedTickets", []);
-  };
+  }, [saveToLocalStorage]);
 
-  const resetAll = () => {
+  const resetAll = useCallback(() => {
     setEventMetaState(null);
     setDynamicFields([]);
     setSelectedTicketsState([]);
     setPersonalDetailsState(null);
     setAdditionalDetailsState({});
     if (typeof window !== "undefined") localStorage.clear();
-  };
+  }, []);
 
   /** Return context value */
-  const value: BookingContextType = {
-    eventMeta,
-    setEventMeta,
-    dynamicFields,
-    setDynamicFields,
-    selectedTickets,
-    setSelectedTickets,
-    setSelectedTicketsFromQuantities,
-    personalDetails,
-    setPersonalDetails,
-    additionalDetails,
-    setAdditionalDetails,
-    totalQuantity,
-    grandTotal,
-    resetCart,
-    resetAll,
-  };
+  const value: BookingContextType = useMemo(
+    () => ({
+      eventMeta,
+      setEventMeta,
+      dynamicFields,
+      setDynamicFields,
+      selectedTickets,
+      setSelectedTickets,
+      setSelectedTicketsFromQuantities,
+      personalDetails,
+      setPersonalDetails,
+      additionalDetails,
+      setAdditionalDetails,
+      totalQuantity,
+      grandTotal,
+      resetCart,
+      resetAll,
+    }),
+    [
+      eventMeta,
+      setEventMeta,
+      dynamicFields,
+      setDynamicFields,
+      selectedTickets,
+      setSelectedTickets,
+      setSelectedTicketsFromQuantities,
+      personalDetails,
+      setPersonalDetails,
+      additionalDetails,
+      setAdditionalDetails,
+      totalQuantity,
+      grandTotal,
+      resetCart,
+      resetAll,
+    ]
+  );
 
   return (
     <BookingContext.Provider value={value}>{children}</BookingContext.Provider>

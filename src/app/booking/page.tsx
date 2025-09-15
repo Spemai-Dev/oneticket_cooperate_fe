@@ -101,7 +101,7 @@ export default function BookingPage() {
     };
 
     fetchFields();
-  }, [EVENT_ID, setEventMeta, setDynamicFields]);
+  }, [EVENT_ID]);
 
   const steps = ["Personal Details", "Additional Info", "Confirmation"];
 
