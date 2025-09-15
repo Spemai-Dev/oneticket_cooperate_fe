@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TicketTier } from "@/components/page/ticket-tier";
 import { ScheduleSelector } from "@/components/page/schedule-selector";
+import { useBooking } from "@/context/BookingContext";
 import axios from "axios";
 import { environment } from "@/config/data";
 
@@ -39,6 +40,7 @@ export function MobileBookingBar({
   tickets,
 }: MobileBookingBarProps) {
   const router = useRouter();
+  const { setDynamicFields, setSelectedTicketsFromQuantities } = useBooking();
   const [isOpen, setIsOpen] = useState(false);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -466,6 +468,14 @@ export function MobileBookingBar({
                         );
                         return;
                       }
+
+                      // Persist selection like desktop flow
+                      setSelectedTicketsFromQuantities(
+                        tickets as any,
+                        quantities
+                      );
+                      setDynamicFields(eventDetails?.fields || []);
+
                       setIsLoading(true);
                       await new Promise((resolve) => setTimeout(resolve, 800));
                       setIsOpen(false);
