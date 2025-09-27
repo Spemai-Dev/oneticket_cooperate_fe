@@ -49,9 +49,9 @@ export function EventDetails() {
       </div>
 
       {/* Event Lineup - Mobile Only */}
-      {/* <div className="lg:hidden">
+      <div className="lg:hidden">
         <EventLineup />
-      </div> */}
+      </div>
 
       {/* Agenda Section */}
       <div>

@@ -362,9 +362,9 @@ export function EventSidebar() {
           </div>
         )}
 
-        {/* <div className="pt-4 hidden lg:block">
+        <div className="pt-4 hidden lg:block">
           <EventLineup />
-        </div> */}
+        </div>
         <div className="pt-4 hidden lg:block">
           <AboutEvent />
         </div>
