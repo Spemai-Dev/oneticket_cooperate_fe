@@ -456,15 +456,15 @@ const day2Agenda = [
     tag: "Ceremony",
     color: "#FFF0F5",
   },
-  {
-    time: "05:15 PM onwards",
-    date: "30 September 2025",
-    title: "Cocktails & Networking",
-    description: "End the conference with cocktails and networking opportunities.",
-    location: "Garden Terrace",
-    tag: "Networking",
-    color: "#F5FFFA",
-  },
+  // {
+  //   time: "05:15 PM onwards",
+  //   date: "30 September 2025",
+  //   title: "Cocktails & Networking",
+  //   description: "End the conference with cocktails and networking opportunities.",
+  //   location: "Garden Terrace",
+  //   tag: "Networking",
+  //   color: "#F5FFFA",
+  // },
 ];
 
 
