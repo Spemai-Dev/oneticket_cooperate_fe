@@ -16,7 +16,7 @@ export function TicketTier({
   onQuantityChange,
 }: TicketTierProps) {
   const remaining = parseInt(ticket.remaining_tickets);
-  const isDisabled = !ticket.is_active || ticket.is_sold_out || remaining === 0;
+  const isDisabled = true;
 
   const priceNumber = parseFloat(ticket.ticket_amount || "0");
   const priceLabel = ticket.is_free_ticket
@@ -31,15 +31,13 @@ export function TicketTier({
       <div className="flex flex-col sm:grid sm:grid-cols-2 sm:items-center py-4 gap-3 sm:gap-0">
         <div className="flex-1 sm:flex-none">
           <p
-            className={`font-semibold text-sm sm:text-base lg:w-24 2xl:w-72 ${
-              ticket.is_sold_out || remaining === 0 ? "text-red-500" : ""
-            }`}
+            className={`font-semibold text-sm sm:text-base lg:w-24 2xl:w-72 text-red-500`}
           >
             {ticket.ticket_name}{" "}
             {ticket.is_compulsory && (
               <span className="ml-2 text-xs text-red-500 ">*</span>
             )}
-            {(ticket.is_sold_out || remaining === 0) && " (Sold Out)"}
+            {" (Sold Out)"}
           </p>
         </div>
 
